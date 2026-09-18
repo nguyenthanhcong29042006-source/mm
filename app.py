@@ -58,7 +58,7 @@ st.markdown("""
       min-height: 0 !important;
   }
   
-  /* Ẩn hẳn thanh sidebar mặc định vì chúng ta đã dùng Popover góc trên */
+  /* Ẩn hoàn toàn thanh sidebar mặc định vì đã dùng nút Popover góc trên */
   [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] {
       display: none !important;
   }
@@ -232,11 +232,12 @@ def header() -> None:
 
 
 # ==========================================================================
-# GIAO DIỆN HEADER & POPOVER ĐĂNG NHẬP GÓC TRÊN BÊN PHẢI
+# GIAO DIỆN HEADER & POPOVER ĐĂNG NHẬP TỐI GIẢN (GÓC TRÊN BÊN PHẢI)
 # ==========================================================================
 auth.khoi_tao_mac_dinh()  # Khởi tạo tài khoản mặc định lần đầu
 
-col_tieu_de, col_dang_nhap = st.columns([3.8, 1.2])
+# Tỷ lệ cột: Dồn diện tích cho tiêu đề, nút đăng nhập thu gọn bên phải
+col_tieu_de, col_dang_nhap = st.columns([4.3, 0.7])
 
 with col_tieu_de:
     header()
@@ -244,30 +245,30 @@ with col_tieu_de:
 with col_dang_nhap:
     u = auth.nguoi_dang_nhap()
     if u:
-        # Nếu đã đăng nhập: Hiện tên cán bộ và nút đăng xuất trong popup nhỏ gọn
-        with st.popover(f"👤 {u.get('ten_dang_nhap')}", use_container_width=True):
+        # Đã đăng nhập: Hiển thị icon user gọn nhẹ
+        with st.popover("👤", use_container_width=True, help=f"Đang đăng nhập: {u.get('ten_dang_nhap')}"):
             st.markdown(f"**{u.get('mo_ta') or u['ten_dang_nhap']}**")
             st.caption(f"{'Quản trị viên' if u['vai_tro'] == 'admin' else 'Cán bộ'}")
             if u.get("phai_doi_mk"):
-                st.warning("Bạn cần đổi mật khẩu.", icon="🔑")
+                st.warning("Cần đổi mật khẩu.", icon="🔑")
             if st.button("Đăng xuất", use_container_width=True, key="btn_dx_popover"):
                 del st.session_state["nguoi_dung"]
                 st.rerun()
     else:
-        # Nếu CHƯA đăng nhập: Hiện nút bấm gọi popup form đăng nhập
-        with st.popover("🔑 Cán bộ đăng nhập", use_container_width=True):
-            st.markdown("### Đăng nhập hệ thống")
+        # Chưa đăng nhập: Nút chìa khóa tối giản
+        with st.popover("🔑", use_container_width=True, help="Đăng nhập dành cho cán bộ"):
+            st.markdown("##### 🔐 Đăng nhập cán bộ")
             with st.form("form_dn_popover", clear_on_submit=False):
-                ten = st.text_input("Tên đăng nhập")
-                mk = st.text_input("Mật khẩu", type="password")
-                if st.form_submit_button("Xác nhận", type="primary", use_container_width=True):
+                ten = st.text_input("Tên đăng nhập", placeholder="Nhập tài khoản...")
+                mk = st.text_input("Mật khẩu", type="password", placeholder="Nhập mật khẩu...")
+                if st.form_submit_button("Đăng nhập", type="primary", use_container_width=True):
                     nd = auth.kiem_tra_dang_nhap(ten, mk)
                     if nd:
                         st.session_state["nguoi_dung"] = nd
-                        st.success("Đăng nhập thành công!")
+                        st.success("Thành công!")
                         st.rerun()
                     else:
-                        st.error("Sai tài khoản hoặc mật khẩu.")
+                        st.error("Sai tài khoản/mật khẩu.")
 
 
 # ============================================================ ĐIỀU HƯỚNG
@@ -295,5 +296,5 @@ if auth.la_admin():
     trang.append(st.Page("giao_dien/tai_khoan.py", title="Tài khoản & phân quyền",
                          icon=":material/manage_accounts:"))
 
-# Chạy điều hướng mà không cần dùng thanh sidebar truyền thống
+# Chạy điều hướng ẩn sidebar, quản lý các trang thông qua nút điều hướng trong giao diện
 st.navigation(trang, position="hidden").run()
