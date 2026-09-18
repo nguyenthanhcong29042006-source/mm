@@ -49,12 +49,23 @@ if not kb.load_kb():
 
 
 # ==========================================================================
+# ĐIỀU HƯỚNG TRANG GIỚI THIỆU (Bổ sung nút bấm tinh tế, gọn nhẹ)
+# ==========================================================================
+col_sp1, col_btn_gt, col_sp2 = st.columns([3, 1.4, 3])
+with col_btn_gt:
+    if st.button("📖 Giới thiệu dự án", use_container_width=True, help="Xem thông tin chi tiết và ý nghĩa dự án"):
+        st.switch_page("giao_dien/gioi_thieu.py")
+
+st.markdown("---")
+
+
+# ==========================================================================
 # HÀM CÓ CACHE (giảm độ trễ: lần 2 trở đi gần như tức thì)
 # ==========================================================================
 @st.cache_data(ttl=3600, show_spinner=False)
 def _dinh_tuyen(cau_noi: str) -> dict:
     r = dinh_tuyen(cau_noi)
-    r["_key"] = r["thu_tuc"].key if r["thu_tuc"] else ""   # ThuTuc không hash được
+    r["_key"] = r["thu_tuc"].key if r["thu_tuc"] else ""    # ThuTuc không hash được
     r.pop("thu_tuc", None)
     return r
 
@@ -251,7 +262,7 @@ if hasattr(st, "segmented_control"):
         "Bà con nói bằng tiếng gì?", LUA_CHON,
         default=LUA_CHON[0], label_visibility="collapsed",
     ) or LUA_CHON[0]
-else:                                    # Streamlit cũ: quay về radio
+else:                                       # Streamlit cũ: quay về radio
     ngon_ngu = st.radio("Bà con nói bằng tiếng gì?", LUA_CHON,
                         index=0, horizontal=True, label_visibility="collapsed")
 
@@ -471,9 +482,6 @@ st.markdown('</div>', unsafe_allow_html=True)
 # ==========================================================================
 # 5. THANH BÊN — chỉ dành cho cán bộ
 # ==========================================================================
-# Bảng trạng thái kỹ thuật chỉ dựng khi có cán bộ đăng nhập. Không chỉ ẩn bằng
-# CSS mà KHÔNG SINH RA phần tử, để trên màn hình của bà con không tồn tại bất kỳ
-# con số nào — kể cả khi có ai đó mở được thanh bên.
 if auth.nguoi_dang_nhap():
     with st.sidebar:
         st.divider()
