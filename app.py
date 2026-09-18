@@ -303,8 +303,13 @@ if not hasattr(st, "navigation") or not hasattr(st, "Page"):
     )
     st.stop()
 
-trang = [st.Page("giao_dien/cong_dan.py", title="Hỏi đáp thủ tục",
-                 icon=":material/record_voice_over:", default=True)]
+# Khai báo danh sách trang trong hệ thống (Đã tích hợp thêm trang Giới thiệu dự án)
+trang = [
+    st.Page("giao_dien/cong_dan.py", title="Hỏi đáp thủ tục",
+             icon=":material/record_voice_over:", default=True),
+    st.Page("giao_dien/gioi_thieu.py", title="Giới thiệu dự án",
+             icon=":material/info:")
+]
 
 u = auth.nguoi_dang_nhap()
 if u and (auth.la_admin() or auth.quyen_cua(u)):
