@@ -28,8 +28,7 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
 # Nguyên tắc: màn hình của bà con chỉ nên có MỘT thứ nổi bật — nút micro.
 # Mọi thứ Streamlit tự thêm vào (thanh Deploy, menu ⋮, huy hiệu GitHub, đồng
 # hồ chạy ở góc) đều bị ẩn, vì bà con không hiểu chúng là gì và rất dễ bấm
-# nhầm. Nút mở thanh bên vẫn giữ lại nhưng làm mờ đi, bởi cán bộ cần nó để
-# đăng nhập.
+# nhầm.
 # ==========================================================================
 st.markdown("""
 <style>
@@ -51,10 +50,6 @@ st.markdown("""
   footer,
   [class*="viewerBadge"],
   [class*="profileContainer"]        { display: none !important; }
-  /* Lưu ý: trên Streamlit Cloud, huy hiệu "Made with Streamlit" và ảnh đại diện
-     chủ app nằm ở TRANG BAO NGOÀI, không nằm trong iframe chạy app này, nên CSS
-     ở đây KHÔNG với tới được. Muốn màn hình sạch hoàn toàn thì mở app bằng địa
-     chỉ trần:  https://<ten-app>.streamlit.app/~/+/  */
 
   /* header trong suốt, không chiếm chiều cao */
   header[data-testid="stHeader"] {
@@ -62,7 +57,11 @@ st.markdown("""
       height: 0 !important;
       min-height: 0 !important;
   }
-  /* Nút mở thanh bên (>>) mặc định bị ẩn — xem phần xử lý ?canbo=1 bên dưới. */
+  
+  /* Ẩn hẳn thanh sidebar mặc định vì chúng ta đã dùng Popover góc trên */
+  [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] {
+      display: none !important;
+  }
 
   /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
   .block-container { padding-top: 2.2rem !important; padding-bottom: 3rem !important; }
@@ -95,16 +94,12 @@ st.markdown("""
   }
 
   /* ---------- khu ghi âm: nút micro tròn, to ---------- */
-  /* Khung ngoài. Phải nới chiều cao: mặc định Streamlit chỉ dành 68px cho cả
-     widget, nút 96px sẽ bị cắt cụt. */
   [data-testid="stAudioInput"] {
       display: flex !important; justify-content: center !important;
       height: auto !important; min-height: 240px !important;
       overflow: visible !important;
       max-width: 560px; margin: 0 auto !important;
   }
-  /* Khung trong — CHÍNH chỗ này cắt mất nút (height:68px + overflow:hidden).
-     Phải mở overflow và bỏ chiều cao cố định, nếu không nút chỉ hiện một vệt. */
   [data-testid="stAudioInput"] > div {
       flex-direction: column !important;
       align-items: center !important;
@@ -119,7 +114,6 @@ st.markdown("""
       padding-top: 10px !important;
   }
   [data-testid="stAudioInput"] > div > div { justify-content: center !important; }
-  /* thanh công cụ nhỏ hiện khi rê chuột vào widget — bà con không cần */
   [data-testid="stAudioInput"] [data-testid="stElementToolbar"] { display: none !important; }
   [data-testid="stAudioInputActionButton"] {
       width: 96px !important; height: 96px !important;
@@ -129,9 +123,8 @@ st.markdown("""
       border: 4px solid #d6efe0 !important;
       box-shadow: 0 6px 18px rgba(27,127,75,.30) !important;
       animation: lgb-tho 2.4s ease-in-out infinite;
-      position: relative !important;     /* để gắn vòng sóng bên dưới */
+      position: relative !important;
   }
-  /* Vòng sóng lan nhẹ khi CHƯA bấm — dấu hiệu "máy đang sẵn sàng nghe" */
   [data-testid="stAudioInputActionButton"]::before,
   [data-testid="stAudioInputActionButton"]::after {
       content: ""; position: absolute; left: 50%; top: 50%;
@@ -151,14 +144,12 @@ st.markdown("""
       width: 44px !important; height: 44px !important;
       fill: #ffffff !important; color: #ffffff !important;
   }
-  /* đang thu âm: Streamlit đổi nhãn nút sang "Stop" -> chuyển đỏ + nhịp sóng */
   [data-testid="stAudioInputActionButton"][aria-label*="top" i],
   [data-testid="stAudioInputActionButton"][title*="top" i] {
       background: #C62828 !important;
       border-color: #f7d5d5 !important;
       animation: lgb-thu 1.1s ease-out infinite;
   }
-  /* đang thu thì tắt vòng sóng chờ — lúc này đã có sóng âm thật chuyển động */
   [data-testid="stAudioInputActionButton"][aria-label*="top" i]::before,
   [data-testid="stAudioInputActionButton"][aria-label*="top" i]::after {
       display: none !important;
@@ -185,8 +176,6 @@ st.markdown("""
   .the-tra-loi { font-size: 20px; line-height: 1.65; }
   .the-tra-loi b { color: #003366; }
   div[data-testid="stVerticalBlockBorderWrapper"] { border-radius: 10px; }
-
-  /* mục "cách khác" ở cuối trang: thu nhỏ, không hút mắt */
   .lgb-phu [data-testid="stExpander"] summary p { font-size: 13px !important; color: #777 !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -194,18 +183,6 @@ st.markdown("""
 
 # ==========================================================================
 # DỌN TRANG BAO NGOÀI CỦA STREAMLIT CLOUD
-#
-# Khi mở bằng địa chỉ  https://<ten-app>.streamlit.app  thì app này KHÔNG phải
-# là trang gốc: Streamlit Cloud phục vụ một trang bao, rồi nhúng app vào trong
-# một iframe. Huy hiệu "Made with Streamlit", ảnh đại diện chủ app và nút
-# "Manage app" nằm ở TRANG BAO, nên CSS viết trong app không với tới được.
-#
-# Iframe đó cùng tên miền với trang bao và có cờ allow-same-origin, nên một
-# đoạn JS chạy trong app vẫn chạm được vào window.top. Đây là cách duy nhất
-# dọn sạch màn hình mà vẫn giữ nguyên địa chỉ gốc đã công bố.
-#
-# Chạy cục bộ (streamlit run app.py) thì không có trang bao, window.top chính
-# là app — đoạn mã chỉ thêm một thẻ style vô hại rồi thôi.
 # ==========================================================================
 _html("""
 <script>
@@ -213,7 +190,7 @@ _html("""
   function don() {
     try {
       var d = window.top.document;
-      if (d.getElementById('lgb-don-trang-bao')) return true;   // đã dọn rồi
+      if (d.getElementById('lgb-don-trang-bao')) return true;
       var st = d.createElement('style');
       st.id = 'lgb-don-trang-bao';
       st.textContent =
@@ -223,10 +200,10 @@ _html("""
       d.head.appendChild(st);
       return true;
     } catch (e) {
-      return false;      // khác nguồn thì thôi, không làm gì cả
+      return false;
     }
   }
-  if (!don()) {          // trang bao có thể dựng xong sau app -> thử lại vài lần
+  if (!don()) {
     var n = 0;
     var t = setInterval(function () { if (don() || ++n > 20) clearInterval(t); }, 500);
   }
@@ -254,45 +231,44 @@ def header() -> None:
     )
 
 
-header()
+# ==========================================================================
+# GIAO DIỆN HEADER & POPOVER ĐĂNG NHẬP GÓC TRÊN BÊN PHẢI
+# ==========================================================================
+auth.khoi_tao_mac_dinh()  # Khởi tạo tài khoản mặc định lần đầu
 
-# ======================================================= ĐĂNG NHẬP (thanh bên)
-auth.khoi_tao_mac_dinh()          # lần chạy đầu tiên: tạo 4 tài khoản mặc định
+col_tieu_de, col_dang_nhap = st.columns([3.8, 1.2])
 
-# Màn hình của bà con phải sạch tuyệt đối: không nút >>, không thanh công cụ.
-# Cán bộ vào bằng địa chỉ riêng có thêm ?canbo=1 thì mới thấy nút mở thanh bên.
-# Đã đăng nhập rồi thì giữ nguyên nút, để không bị khoá ngoài giữa chừng.
-if not ("canbo" in st.query_params or auth.nguoi_dang_nhap()):
-    st.markdown(
-        '<style>[data-testid="stSidebarCollapsedControl"]{display:none !important;}</style>',
-        unsafe_allow_html=True,
-    )
+with col_tieu_de:
+    header()
 
-with st.sidebar:
+with col_dang_nhap:
     u = auth.nguoi_dang_nhap()
     if u:
-        st.markdown(f"**{u.get('mo_ta') or u['ten_dang_nhap']}**")
-        st.caption(f"`{u['ten_dang_nhap']}` · "
-                   f"{'Quản trị viên' if u['vai_tro'] == 'admin' else 'Cán bộ'}")
-        if u.get("phai_doi_mk"):
-            st.warning("Bạn cần đổi mật khẩu.", icon="🔑")
-        if st.button("Đăng xuất", use_container_width=True):
-            del st.session_state["nguoi_dung"]
-            st.rerun()
+        # Nếu đã đăng nhập: Hiện tên cán bộ và nút đăng xuất trong popup nhỏ gọn
+        with st.popover(f"👤 {u.get('ten_dang_nhap')}", use_container_width=True):
+            st.markdown(f"**{u.get('mo_ta') or u['ten_dang_nhap']}**")
+            st.caption(f"{'Quản trị viên' if u['vai_tro'] == 'admin' else 'Cán bộ'}")
+            if u.get("phai_doi_mk"):
+                st.warning("Bạn cần đổi mật khẩu.", icon="🔑")
+            if st.button("Đăng xuất", use_container_width=True, key="btn_dx_popover"):
+                del st.session_state["nguoi_dung"]
+                st.rerun()
     else:
-        st.markdown("### Đăng nhập cán bộ")
-        st.caption("Bà con không cần đăng nhập — cứ dùng trang Hỏi đáp.")
-        with st.form("dang_nhap", clear_on_submit=False):
-            ten = st.text_input("Tên đăng nhập")
-            mk = st.text_input("Mật khẩu", type="password")
-            if st.form_submit_button("Đăng nhập", type="primary",
-                                     use_container_width=True):
-                nd = auth.kiem_tra_dang_nhap(ten, mk)
-                if nd:
-                    st.session_state["nguoi_dung"] = nd
-                    st.rerun()
-                else:
-                    st.error("Sai tên đăng nhập hoặc mật khẩu.")
+        # Nếu CHƯA đăng nhập: Hiện nút bấm gọi popup form đăng nhập
+        with st.popover("🔑 Cán bộ đăng nhập", use_container_width=True):
+            st.markdown("### Đăng nhập hệ thống")
+            with st.form("form_dn_popover", clear_on_submit=False):
+                ten = st.text_input("Tên đăng nhập")
+                mk = st.text_input("Mật khẩu", type="password")
+                if st.form_submit_button("Xác nhận", type="primary", use_container_width=True):
+                    nd = auth.kiem_tra_dang_nhap(ten, mk)
+                    if nd:
+                        st.session_state["nguoi_dung"] = nd
+                        st.success("Đăng nhập thành công!")
+                        st.rerun()
+                    else:
+                        st.error("Sai tài khoản hoặc mật khẩu.")
+
 
 # ============================================================ ĐIỀU HƯỚNG
 if not hasattr(st, "navigation") or not hasattr(st, "Page"):
@@ -303,7 +279,7 @@ if not hasattr(st, "navigation") or not hasattr(st, "Page"):
     )
     st.stop()
 
-# Khai báo danh sách trang trong hệ thống (Đã tích hợp thêm trang Giới thiệu dự án)
+# Khai báo danh sách trang trong hệ thống (Hỏi đáp, Giới thiệu, Quản trị, Tài khoản)
 trang = [
     st.Page("giao_dien/cong_dan.py", title="Hỏi đáp thủ tục",
              icon=":material/record_voice_over:", default=True),
@@ -319,4 +295,5 @@ if auth.la_admin():
     trang.append(st.Page("giao_dien/tai_khoan.py", title="Tài khoản & phân quyền",
                          icon=":material/manage_accounts:"))
 
-st.navigation(trang, position="sidebar").run()
+# Chạy điều hướng mà không cần dùng thanh sidebar truyền thống
+st.navigation(trang, position="hidden").run()
