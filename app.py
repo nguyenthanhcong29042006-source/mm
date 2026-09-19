@@ -23,11 +23,11 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & TỐI ƯU ĐỒNG BỘ CĂN TRÁI TUYỆT ĐỐI CHO MỌI THIẾT BỊ
+# GIAO DIỆN CHUNG & ÉP CỐ ĐỊNH CĂN TRÁI TUYỆT ĐỐI CHO MỌI THIẾT BỊ
 # ==========================================================================
 st.markdown("""
 <style>
-  /* ---------- ÉP CỐ ĐỊNH THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG NGANG ---------- */
+  /* ---------- ÉP THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG NGANG ---------- */
   div[data-testid="stHorizontalBlock"]:first-of-type {
       display: flex !important;
       flex-direction: row !important;
@@ -44,12 +44,13 @@ st.markdown("""
       width: auto !important;
   }
 
-  /* ---------- ÉP NÚT PAGE_LINK DÍNH SÁT LỀ TRÁI (ĐẦU DÒNG) TUYỆT ĐỐI ---------- */
+  /* ---------- TRIỆT TIÊU HOÀN TOÀN CĂN GIỮA, ÉP NÚT DÍNH SÁT LỀ TRÁI VÀ ĐỦ CHỮ ---------- */
   div.element-container:has([data-testid="stPageLink"]) {
       display: flex !important;
       justify-content: flex-start !important;
       text-align: left !important;
       width: 100% !important;
+      margin: 4px 0 !important;
   }
   [data-testid="stPageLink"] {
       display: inline-flex !important;
@@ -75,14 +76,14 @@ st.markdown("""
   [data-testid="stPageLink"] span {
       white-space: nowrap !important;
       overflow: visible !important;
-      text-overflow: unset !important;
+      text-overflow: clip !important;
       font-family: 'Times New Roman', Times, serif !important;
       font-size: 15px !important;
       color: #003366 !important;
       font-weight: 600 !important;
   }
 
-  /* ---------- phông chữ ---------- */
+  /* ---------- phông chữ chung ---------- */
   .stApp, p, h1,h2,h3,h4,h5,h6, label, button, input, .stMarkdown, .stText, .stTextArea
       { font-family: 'Times New Roman', Times, serif !important; }
   [data-testid="stExpanderToggleIcon"], [data-testid="stIconMaterial"],
