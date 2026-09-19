@@ -6,8 +6,6 @@ import html
 from pathlib import Path
 from core import auth
 
-ROOT = Path(__file__).resolve().parent.parent
-
 # ==============================================================================
 # TỐI ƯU HÓA KHOẢNG TRẮNG & RESPONSIVE CHUẨN MỰC (Cả PC & Mobile)
 # ==============================================================================
@@ -15,7 +13,7 @@ st.markdown("""
 <style>
     /* Thu hẹp khoảng đệm container chính để giao diện áp sát lề gọn gàng */
     .block-container {
-        padding-top: 1.2rem !important;
+        padding-top: 1rem !important;
         padding-bottom: 3rem !important;
         max-width: 900px !important;
     }
@@ -23,42 +21,18 @@ st.markdown("""
     /* Tối ưu riêng cho màn hình điện thoại di động */
     @media screen and (max-width: 640px) {
         .block-container {
-            padding-top: 0.6rem !important;
+            padding-top: 0.5rem !important;
             padding-left: 0.8rem !important;
             padding-right: 0.8rem !important;
         }
     }
-
-    /* ---------- header dự án: gom sát gọn lại một dòng ---------- */
-    .lgb-header {
-        display: flex; align-items: center; gap: 8px;
-        padding-bottom: 4px; 
-    }
-    .lgb-header img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
-    .lgb-ten {
-        color: #003366; font-size: 17px; font-weight: bold;
-        letter-spacing: .2px; white-space: nowrap;
-    }
-    .lgb-slogan {
-        color: #666; font-size: 11.5px; font-style: italic;
-        border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px;
-    }
-    @media (max-width: 640px) {
-        .lgb-slogan { display: none; }          /* điện thoại: bỏ slogan cho gọn */
-        .lgb-ten    { font-size: 15px; }
-    }
 </style>
 """, unsafe_allow_html=True)
-
-@st.cache_data(show_spinner=False)
-def _logo_b64() -> str:
-    p = ROOT / "logo_hoc_vien.png"
-    return base64.b64encode(p.read_bytes()).decode() if p.exists() else ""
 
 # ==============================================================================
 # CƠ CHẾ LƯU TRỮ FILE CỨNG AN TOÀN (Mã hóa UTF-8 chống lỗi font)
 # ==============================================================================
-DATA_FILE = ROOT / "data" / "gioi_thieu.md"
+DATA_FILE = "data/gioi_thieu.md"
 
 def load_intro_content():
     """Đọc nội dung giới thiệu từ file cứng với chuẩn UTF-8, có dự phòng nội dung mặc định."""
@@ -152,14 +126,14 @@ def docx_to_exact_html(docx_file) -> str:
                 elif "heading 2" in style_name:
                     tag = "h3"
                 
-                html_parts.append(f'<{tag} style="{align_style} margin-bottom: 12px;">{full_p_text}</{tag}>')
+                html_parts.append(f'<{tag} style="{align_style} margin-bottom: 10px;">{full_p_text}</{tag}>')
         
         for table in doc.tables:
-            table_html = ['<div style="overflow-x: auto; margin: 20px 0;"><table style="border-collapse: collapse; width: 100%;">']
+            table_html = ['<div style="overflow-x: auto; margin: 15px 0;"><table style="border-collapse: collapse; width: 100%;">']
             for row in table.rows:
                 table_html.append('<tr>')
                 for cell in row.cells:
-                    table_html.append(f'<td style="border: 1px solid #cccccc; padding: 10px 14px; text-align: left;">{html.escape(cell.text)}</td>')
+                    table_html.append(f'<td style="border: 1px solid #cccccc; padding: 8px 12px; text-align: left;">{html.escape(cell.text)}</td>')
                 table_html.append('</tr>')
             table_html.append('</table></div>')
             html_parts.append("".join(table_html))
@@ -173,60 +147,16 @@ if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
 # ==============================================================================
-# GIAO DIỆN HEADER CHUẨN (Logo, Tên, Slogan bên trái + Nút chìa khóa góc phải)
+# KHU VỰC ĐIỀU HƯỚNG & TIÊU ĐỀ (Dùng page_link chống vỡ bố cục trên Mobile)
 # ==============================================================================
-auth.khoi_tao_mac_dinh()
-
-col_tieu_de, col_dang_nhap = st.columns([5.2, 0.8], vertical_alignment="center")
-
-with col_tieu_de:
-    b64 = _logo_b64()
-    img = (f'<img src="data:image/png;base64,{b64}" alt="">' if b64 else "")
-    st.markdown(
-        f'<div class="lgb-header">{img}'
-        f'<span class="lgb-ten">LUẬT GẦN BẢN</span>'
-        f'<span class="lgb-slogan">Chuyển đổi số: '
-        f'không để ai bị bỏ lại phía sau</span></div>',
-        unsafe_allow_html=True,
-    )
-
-with col_dang_nhap:
-    u = auth.nguoi_dang_nhap()
-    if u:
-        with st.popover("👤", use_container_width=True, help=f"Đang đăng nhập: {u.get('ten_dang_nhap')}"):
-            st.markdown(f"**{u.get('mo_ta') or u['ten_dang_nhap']}**")
-            st.caption(f"{'Quản trị viên' if u['vai_tro'] == 'admin' else 'Cán bộ'}")
-            if u.get("phai_doi_mk"):
-                st.warning("Cần đổi mật khẩu.", icon="🔑")
-            if st.button("Đăng xuất", use_container_width=True, key="btn_dx_popover_gt"):
-                del st.session_state["nguoi_dung"]
-                st.rerun()
-    else:
-        with st.popover("🔑", use_container_width=True, help="Đăng nhập dành cho cán bộ"):
-            st.markdown("##### 🔐 Đăng nhập cán bộ")
-            with st.form("form_dn_popover_gt", clear_on_submit=False):
-                ten = st.text_input("Tên đăng nhập", placeholder="Nhập tài khoản...")
-                mk = st.text_input("Mật khẩu", type="password", placeholder="Nhập mật khẩu...")
-                if st.form_submit_button("Đăng nhập", type="primary", use_container_width=True):
-                    nd = auth.kiem_tra_dang_nhap(ten, mk)
-                    if nd:
-                        st.session_state["nguoi_dung"] = nd
-                        st.success("Thành công!")
-                        st.rerun()
-                    else:
-                        st.error("Sai tài khoản/mật khẩu.")
-
-st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
-
-# Nút quay lại trang Hỏi đáp chính
 st.page_link("giao_dien/cong_dan.py", label="Quay lại trang Hỏi đáp chính", icon="⬅️")
-st.markdown("<br>", unsafe_allow_html=True)
+
+st.markdown("<hr style='margin: 8px 0 12px 0;'>", unsafe_allow_html=True)
 st.title("📖 Giới thiệu Dự án & Ý nghĩa")
 
-# ==============================================================================
-# LOGIC PHÂN QUYỀN ADMIN: Quản trị nội dung an toàn, mượt mà
-# ==============================================================================
+# Lấy thông tin tài khoản đăng nhập để kiểm tra phân quyền quản trị
 u = auth.nguoi_dang_nhap()
+
 if u and u.get("vai_tro") == "admin":
     with st.expander("⚙️ BẢNG ĐIỀU KHIỂN ADMIN - CHỈNH SỬA NỘI DUNG", expanded=False):
         st.warning("Bạn đang đăng nhập bằng tài khoản Quản trị viên. Mọi thay đổi sẽ được lưu vĩnh viễn vào hệ thống.")
@@ -265,30 +195,29 @@ if u and u.get("vai_tro") == "admin":
                 if file_content:
                     st.caption("Xem trước bố cục tài liệu:")
                     preview_html = f"""
-                    <div style="background: #ffffff; color: #000000; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: 'Times New Roman', Times, serif; line-height: 1.7; max-height: 400px; overflow-y: auto; margin-bottom: 20px; box-sizing: border-box;">
+                    <div style="background: #ffffff; color: #000000; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: 'Times New Roman', Times, serif; line-height: 1.7; max-height: 350px; overflow-y: auto; margin-bottom: 15px; box-sizing: border-box;">
                         {file_content}
                     </div>
                     """
                     st.markdown(preview_html, unsafe_allow_html=True)
                     
-                    st.markdown("<br>", unsafe_allow_html=True)
                     if st.button("🚀 Xác nhận cập nhật từ file", type="primary", use_container_width=True):
                         if save_intro_content(file_content):
                             st.session_state["intro_content"] = file_content
                             st.success("Đã cập nhật nội dung chuẩn định dạng từ file thành công!")
                             st.rerun()
                 
-    st.markdown("<hr style='margin: 15px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
-# HIỂN THỊ NỘI DUNG CHÍNH (Responsive chuẩn mực hoàn hảo cho cả PC và Mobile)
+# HIỂN THỊ NỘI DUNG CHÍNH (Co giãn mượt mà, chống vỡ giao diện trên Mobile)
 # ==============================================================================
 document_html = f"""
 <div style="
     background: #ffffff;
     color: #111111;
-    padding: clamp(15px, 4vw, 50px);
-    margin: 10px auto;
+    padding: clamp(15px, 3.5vw, 45px);
+    margin: 5px auto;
     max-width: 900px;
     width: 100%;
     border-radius: 6px;
@@ -303,7 +232,7 @@ document_html = f"""
             max-width: 100% !important;
             height: auto !important;
             display: block !important;
-            margin: 25px auto !important;
+            margin: 20px auto !important;
             border-radius: 6px !important;
             box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
         }}
@@ -311,25 +240,26 @@ document_html = f"""
             color: #003366 !important;
             font-family: 'Times New Roman', Times, serif !important;
             font-weight: bold !important;
-            margin-top: 25px !important;
-            margin-bottom: 12px !important;
+            margin-top: 20px !important;
+            margin-bottom: 10px !important;
             word-wrap: break-word;
         }}
         p {{
-            margin-bottom: 15px !important;
+            margin-bottom: 12px !important;
             word-wrap: break-word;
         }}
+        /* Ép bảng biểu tự động sinh thanh cuộn ngang khi xem trên màn hình nhỏ */
         table {{
             border-collapse: collapse;
             width: 100%;
-            margin: 20px 0;
+            margin: 15px 0;
             display: block;
             overflow-x: auto;
             white-space: nowrap;
         }}
         th, td {{
             border: 1px solid #cccccc;
-            padding: 10px 14px;
+            padding: 8px 12px;
             text-align: left;
         }}
     </style>
