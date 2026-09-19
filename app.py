@@ -23,7 +23,7 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & TỐI ƯU GIAO DIỆN HEADER (Sát gọn, chuẩn Responsive)
+# GIAO DIỆN CHUNG & CSS TỐI ƯU CỐ ĐỊNH HEADER TRÊN MOBILE
 # ==========================================================================
 st.markdown("""
 <style>
@@ -46,37 +46,33 @@ st.markdown("""
   [class*="viewerBadge"],
   [class*="profileContainer"]        { display: none !important; }
 
-  /* header trong suốt, không chiếm chiều cao */
   header[data-testid="stHeader"] {
       background: transparent !important;
       height: 0 !important;
       min-height: 0 !important;
   }
   
-  /* Ẩn hoàn toàn thanh sidebar mặc định vì đã dùng nút Popover góc trên */
   [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] {
       display: none !important;
   }
 
-  /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
   .block-container { padding-top: 1rem !important; padding-bottom: 3rem !important; max-width: 900px !important; }
 
-  /* Component HTML: bỏ viền */
   iframe[title="streamlit.components.v1.html"] { border: 0 !important; }
   iframe[title="streamlit.components.v1.html"][height="0"] {
       height: 0 !important; display: block !important;
   }
 
-  /* ---------- header dự án: gom sát gọn lại một dòng, loại bỏ khoảng trắng thừa ---------- */
+  /* ---------- header dự án: gom sát gọn lại một dòng ---------- */
   .lgb-header {
       display: inline-flex; 
       align-items: center; 
-      gap: 6px; /* Khoảng cách siêu khít giữa logo và chữ */
+      gap: 6px; 
       margin: 0 !important;
       padding: 0 !important;
   }
   .lgb-header img { 
-      height: 30px !important; 
+      height: 28px !important; 
       width: auto !important; 
       object-fit: contain; 
       flex-shrink: 0;
@@ -84,16 +80,38 @@ st.markdown("""
       padding: 0 !important;
   }
   .lgb-ten {
-      color: #003366; font-size: 17px; font-weight: bold;
+      color: #003366; font-size: 16px; font-weight: bold;
       letter-spacing: .2px; white-space: nowrap;
   }
   .lgb-slogan {
-      color: #666; font-size: 11.5px; font-style: italic;
-      border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px;
+      color: #666; font-size: 11px; font-style: italic;
+      border-left: 1px solid #ccc; padding-left: 6px; margin-left: 4px;
   }
-  @media (max-width: 640px) {
-      .lgb-slogan { display: none; }          /* điện thoại: bỏ slogan cho gọn */
-      .lgb-ten    { font-size: 15px; }
+  
+  /* Cố định thanh tiêu đề không bị rớt dòng trên màn hình điện thoại */
+  @media screen and (max-width: 768px) {
+      .lgb-slogan { display: none; } /* Điện thoại nhỏ ẩn slogan để tiết kiệm diện tích */
+      .lgb-ten    { font-size: 14px; }
+      
+      /* Ép các cột của header luôn nằm trên 1 hàng ngang trên mobile */
+      div[data-testid="stHorizontalBlock"] {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          flex-wrap: nowrap !important;
+      }
+      div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+          width: auto !important;
+          flex: unset !important;
+      }
+      div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1) {
+          flex: 1 !important;
+          overflow: hidden;
+      }
+      div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
+          flex: 0 0 auto !important;
+          min-width: 45px !important;
+      }
   }
 
   /* ---------- khu ghi âm: nút micro tròn, to ---------- */
@@ -226,7 +244,7 @@ def _logo_b64() -> str:
 # ==========================================================================
 auth.khoi_tao_mac_dinh()  # Khởi tạo tài khoản mặc định lần đầu
 
-# Chia tỷ lệ cột [7, 1]: Tiêu đề bên trái ôm sát gọn, nút đăng nhập tách riêng góc phải
+# Chia tỷ lệ cột [7, 1]: Tiêu đề bên trái, nút chìa khóa nằm gọn bên phải
 col_tieu_de, col_dang_nhap = st.columns([7, 1], vertical_alignment="center")
 
 with col_tieu_de:
