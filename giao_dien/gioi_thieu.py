@@ -6,12 +6,25 @@ import html
 from pathlib import Path
 from core import auth
 
-# Tối ưu hóa khoảng trắng đầu trang cho cả PC và Mobile
+# ==============================================================================
+# TỐI ƯU HÓA KHOẢNG TRẮNG & GIAO DIỆN RESPONSIVE (Cả PC & Mobile)
+# ==============================================================================
 st.markdown("""
 <style>
+    /* Thu hẹp khoảng đệm của container chính, loại bỏ khoảng trống lớn phía trên */
     .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 2rem !important;
+        padding-top: 1.2rem !important;
+        padding-bottom: 3rem !important;
+        max-width: 900px !important;
+    }
+    
+    /* Tự động tối ưu riêng cho màn hình điện thoại di động */
+    @media screen and (max-width: 640px) {
+        .block-container {
+            padding-top: 0.6rem !important;
+            padding-left: 0.8rem !important;
+            padding-right: 0.8rem !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -133,11 +146,11 @@ def docx_to_exact_html(docx_file) -> str:
 if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
-# Nút điều hướng gọn gàng sát lề trên
-if st.button("⬅️ Quay lại trang Hỏi đáp chính"):
+# Nút điều hướng quay lại trang Hỏi đáp chính bố trí gọn gàng sát lề trên
+if st.button("⬅️ Quay lại trang Hỏi đáp chính", use_container_width=False):
     st.switch_page("giao_dien/cong_dan.py")
 
-st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin: 10px 0 15px 0;'>", unsafe_allow_html=True)
 st.title("📖 Giới thiệu Dự án & Ý nghĩa")
 
 u = auth.nguoi_dang_nhap()
@@ -193,7 +206,7 @@ if u and u.get("vai_tro") == "admin":
                             st.success("Đã cập nhật nội dung chuẩn định dạng từ file thành công!")
                             st.rerun()
                 
-    st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 15px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
 # HIỂN THỊ NỘI DUNG CHÍNH (Responsive chuẩn mực hoàn hảo cho cả PC và Mobile)
@@ -203,7 +216,7 @@ document_html = f"""
     background: #ffffff;
     color: #111111;
     padding: clamp(15px, 4vw, 50px);
-    margin: 5px auto;
+    margin: 10px auto;
     max-width: 900px;
     width: 100%;
     border-radius: 6px;
@@ -238,15 +251,14 @@ document_html = f"""
             border-collapse: collapse;
             width: 100%;
             margin: 20px 0;
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
         }}
         th, td {{
             border: 1px solid #cccccc;
             padding: 10px 14px;
             text-align: left;
-        }}
-        div[style*="overflow-x: auto"] {{
-            width: 100%;
-            overflow-x: auto;
         }}
     </style>
     {st.session_state["intro_content"]}
