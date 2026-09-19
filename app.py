@@ -23,47 +23,43 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & ÉP CỐ ĐỊNH CĂN TRÁI TUYỆT ĐỐI CHO MỌI THIẾT BỊ
+# GIAO DIỆN CHUNG & TỐI ƯU CSS CHUYÊN SÂU (Đảm bảo cân đối, không khuyết chữ)
 # ==========================================================================
 st.markdown("""
 <style>
-  /* ---------- ÉP THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG NGANG ---------- */
-  div[data-testid="stHorizontalBlock"]:first-of-type {
-      display: flex !important;
-      flex-direction: row !important;
-      flex-wrap: nowrap !important;
-      align-items: center !important;
-      width: 100% !important;
-  }
-  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"] {
-      min-width: 0 !important;
-      flex: 1 1 auto !important;
-  }
-  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"]:last-child {
-      flex: 0 0 auto !important;
-      width: auto !important;
+  /* ---------- ÉP CỐ ĐỊNH THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG NGANG TRÊN MỌI THIẾT BỊ ---------- */
+  @media (max-width: 768px) {
+      div[data-testid="stHorizontalBlock"] {
+          display: flex !important;
+          flex-direction: row !important;
+          flex-wrap: nowrap !important;
+          align-items: center !important;
+          width: 100% !important;
+      }
+      div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
+          flex: 1 1 auto !important;
+          min-width: 0 !important;
+          width: auto !important;
+      }
+      div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child {
+          flex: 0 0 auto !important;
+          width: auto !important;
+      }
   }
 
-  /* ---------- TRIỆT TIÊU HOÀN TOÀN CĂN GIỮA, ÉP NÚT DÍNH SÁT LỀ TRÁI VÀ ĐỦ CHỮ ---------- */
-  div.element-container:has([data-testid="stPageLink"]) {
-      display: flex !important;
-      justify-content: flex-start !important;
-      text-align: left !important;
-      width: 100% !important;
-      margin: 4px 0 !important;
-  }
+  /* ---------- TỐI ƯU TUYỆT ĐỐI NÚT ST.PAGE_LINK (Căn giữa, không khuyết chữ, không tràn viền) ---------- */
   [data-testid="stPageLink"] {
-      display: inline-flex !important;
-      justify-content: flex-start !important;
+      display: flex !important;
+      justify-content: center !important;
       align-items: center !important;
-      margin-left: 0 !important;
-      margin-right: auto !important;
+      margin: 0 auto !important;             /* Căn giữa tuyệt đối trên mọi màn hình */
       width: fit-content !important;
+      min-width: 200px !important;           /* Đảm bảo bề rộng đủ chứa trọn vẹn văn bản */
       max-width: 100% !important;
       background-color: #fcfcfc !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
-      padding: 8px 16px !important;
+      padding: 8px 18px !important;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
       transition: all 0.25s ease-in-out !important;
       box-sizing: border-box !important;
@@ -76,14 +72,14 @@ st.markdown("""
   [data-testid="stPageLink"] span {
       white-space: nowrap !important;
       overflow: visible !important;
-      text-overflow: clip !important;
+      text-overflow: unset !important;      /* Triệt tiêu hoàn toàn hiện tượng dấu chấm lửng (...) */
       font-family: 'Times New Roman', Times, serif !important;
       font-size: 15px !important;
       color: #003366 !important;
       font-weight: 600 !important;
   }
 
-  /* ---------- phông chữ chung ---------- */
+  /* ---------- phông chữ ---------- */
   .stApp, p, h1,h2,h3,h4,h5,h6, label, button, input, .stMarkdown, .stText, .stTextArea
       { font-family: 'Times New Roman', Times, serif !important; }
   [data-testid="stExpanderToggleIcon"], [data-testid="stIconMaterial"],
@@ -102,18 +98,23 @@ st.markdown("""
   [class*="viewerBadge"],
   [class*="profileContainer"]        { display: none !important; }
 
+  /* header trong suốt, không chiếm chiều cao */
   header[data-testid="stHeader"] {
       background: transparent !important;
       height: 0 !important;
       min-height: 0 !important;
   }
   
+  /* Ẩn hoàn toàn thanh sidebar mặc định vì đã dùng nút Popover góc trên */
   [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] {
       display: none !important;
   }
 
-  .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; }
+  /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
+  .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; max-width: 900px !important; }
 
+  /* Component HTML: bỏ viền. Riêng cái cao 0 (đoạn JS dọn trang bao) thì
+     không được chiếm chỗ. KHÔNG ẩn tất cả — nút loa cũng là component. */
   iframe[title="streamlit.components.v1.html"] { border: 0 !important; }
   iframe[title="streamlit.components.v1.html"][height="0"] {
       height: 0 !important; display: block !important;
@@ -121,30 +122,21 @@ st.markdown("""
 
   /* ---------- header dự án: gom về MỘT dòng ---------- */
   .lgb-header {
-      display: inline-flex; 
-      align-items: center; 
-      gap: 6px;
-      margin: 0 !important; 
-      padding: 0 !important;
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
+      display: inline-flex; align-items: center; gap: 8px;
+      margin: 0 !important; padding: 0 !important;
   }
-  .lgb-header img { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
+  .lgb-header img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
   .lgb-ten {
-      color: #003366; font-size: 16px; font-weight: bold;
+      color: #003366; font-size: 17px; font-weight: bold;
       letter-spacing: .2px; white-space: nowrap;
   }
   .lgb-slogan {
-      color: #666; font-size: 11px; font-style: italic;
-      border-left: 1px solid #ccc; padding-left: 6px; margin-left: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      color: #666; font-size: 11.5px; font-style: italic;
+      border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px;
   }
   @media (max-width: 640px) {
-      .lgb-slogan { display: none; }          
-      .lgb-ten    { font-size: 14px; }
+      .lgb-slogan { display: none; }          /* điện thoại: bỏ slogan cho gọn */
+      .lgb-ten    { font-size: 15px; }
   }
 
   /* ---------- khu ghi âm: nút micro tròn, to ---------- */
