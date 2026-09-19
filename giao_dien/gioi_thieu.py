@@ -22,7 +22,6 @@ def load_intro_content():
     except Exception:
         pass
     
-    # Nội dung mặc định chuẩn tiếng Việt nếu file trống hoặc lỗi
     return """<h2 style="text-align: center; color: #003366;">GIỚI THIỆU DỰ ÁN</h2>
 <h2 style="text-align: center; color: #003366;">LUẬT GẦN BẢN</h2>
 <p style="text-align: center;"><b>Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số</b></p>
@@ -53,7 +52,6 @@ def docx_to_exact_html(docx_file) -> str:
         html_parts = []
         
         for p in doc.paragraphs:
-            # Xác định căn lề chuẩn
             align_style = "text-align: left;"
             if p.alignment == WD_ALIGN_PARAGRAPH.CENTER:
                 align_style = "text-align: center;"
@@ -66,7 +64,6 @@ def docx_to_exact_html(docx_file) -> str:
             for run in p.runs:
                 text = run.text
                 if not text:
-                    # Trích xuất hình ảnh nhúng bên trong đoạn văn bản
                     try:
                         drawings = run._r.xpath('.//a:blip')
                         for blip in drawings:
@@ -80,9 +77,7 @@ def docx_to_exact_html(docx_file) -> str:
                         pass
                     continue
                 
-                # Chống lỗi ký tự đặc biệt (XSS/HTML Escaping an toàn tuyệt đối)
                 safe_text = html.escape(text)
-                
                 style_runs = []
                 if run.bold:
                     safe_text = f"<b>{safe_text}</b>"
@@ -110,7 +105,6 @@ def docx_to_exact_html(docx_file) -> str:
                 
                 html_parts.append(f'<{tag} style="{align_style} margin-bottom: 12px;">{full_p_text}</{tag}>')
         
-        # Xử lý bảng biểu (tables) chuẩn xác với cuộn ngang trên mobile
         for table in doc.tables:
             table_html = ['<div style="overflow-x: auto; margin: 20px 0;"><table style="border-collapse: collapse; width: 100%;">']
             for row in table.rows:
@@ -126,18 +120,41 @@ def docx_to_exact_html(docx_file) -> str:
         st.error(f"Không thể đọc file Word: {e}")
         return ""
 
-# Nạp dữ liệu vào bộ nhớ tạm an toàn
 if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
-# Nút điều hướng quay lại trang chủ Hỏi đáp
-if st.button("⬅️ Quay lại trang Hỏi đáp chính"):
-    st.switch_page("giao_dien/cong_dan.py")
+# ==============================================================================
+# THANH TIÊU ĐỀ & ĐIỀU HƯỚNG GOM GỌN TRÊN 1 HÀNG NGANG (ĐÃ KHẮC PHỤC KHOẢNG TRẮNG)
+# ==============================================================================
+st.markdown("""
+<div style="
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    background: #ffffff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+    gap: 15px;
+    box-sizing: border-box;
+">
+    <div style="display: flex; align-items: center; gap: 12px; white-space: nowrap;">
+        <span style="font-size: 20px; font-weight: bold; color: #0B4F9E; font-family: 'Times New Roman', Times, serif;">📖 Giới thiệu Dự án</span>
+        <span style="color: #ddd;">|</span>
+        <span style="font-size: 14px; color: #555; font-style: italic;">Chuyển đổi số: Không để ai bị bỏ lại phía sau</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+col_back, col_space = st.columns([1, 4])
+with col_back:
+    if st.button("⬅️ Quay lại trang chính", use_container_width=True):
+        st.switch_page("giao_dien/cong_dan.py")
 
 st.markdown("---")
-st.title("📖 Giới thiệu Dự án & Ý nghĩa")
 
-# Lấy thông tin tài khoản đang đăng nhập để kiểm tra phân quyền
 u = auth.nguoi_dang_nhap()
 
 # ==============================================================================
