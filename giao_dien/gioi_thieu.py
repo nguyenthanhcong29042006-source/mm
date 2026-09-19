@@ -53,6 +53,7 @@ def docx_to_exact_html(docx_file) -> str:
         html_parts = []
         
         for p in doc.paragraphs:
+            # Xác định căn lề chuẩn
             align_style = "text-align: left;"
             if p.alignment == WD_ALIGN_PARAGRAPH.CENTER:
                 align_style = "text-align: center;"
@@ -65,6 +66,7 @@ def docx_to_exact_html(docx_file) -> str:
             for run in p.runs:
                 text = run.text
                 if not text:
+                    # Trích xuất hình ảnh nhúng bên trong đoạn văn bản
                     try:
                         drawings = run._r.xpath('.//a:blip')
                         for blip in drawings:
@@ -78,7 +80,9 @@ def docx_to_exact_html(docx_file) -> str:
                         pass
                     continue
                 
+                # Chống lỗi ký tự đặc biệt (XSS/HTML Escaping an toàn tuyệt đối)
                 safe_text = html.escape(text)
+                
                 style_runs = []
                 if run.bold:
                     safe_text = f"<b>{safe_text}</b>"
@@ -106,6 +110,7 @@ def docx_to_exact_html(docx_file) -> str:
                 
                 html_parts.append(f'<{tag} style="{align_style} margin-bottom: 12px;">{full_p_text}</{tag}>')
         
+        # Xử lý bảng biểu (tables) chuẩn xác với cuộn ngang trên mobile
         for table in doc.tables:
             table_html = ['<div style="overflow-x: auto; margin: 20px 0;"><table style="border-collapse: collapse; width: 100%;">']
             for row in table.rows:
@@ -125,31 +130,11 @@ def docx_to_exact_html(docx_file) -> str:
 if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
-# ==============================================================================
-# HEADER SẠCH SẼ, GỌN GÀNG (Đã loại bỏ hoàn toàn các đường kẻ ngang thừa)
-# ==============================================================================
-col_logo_title, col_btn_login = st.columns([6, 1], vertical_alignment="center")
-
-with col_logo_title:
-    st.markdown("""
-    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 4px 0;">
-        <span style="font-weight: 900; color: #CC0000; font-size: 15px; background: #fff; padding: 2px 6px; border: 1px solid #ddd; border-radius: 4px;">APAG</span>
-        <span style="font-weight: bold; font-size: 21px; color: #002244; font-family: 'Times New Roman', Times, serif; letter-spacing: 0.3px;">LUẬT GẦN BẢN</span>
-        <span style="color: #cccccc; font-size: 18px; font-weight: 300;">|</span>
-        <span style="font-size: 14px; color: #555555; font-style: italic; font-family: 'Times New Roman', Times, serif;">Chuyển đổi số: không để ai bị bỏ lại phía sau</span>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col_btn_login:
-    u = auth.nguoi_dang_nhap()
-    btn_label = f"🔑 {u['ten']}" if u else "🔑"
-    if st.button(btn_label, use_container_width=True, help="Quản lý tài khoản / Đăng nhập"):
-        st.switch_page("giao_dien/tai_khoan.py")
-
-# Nút quay lại trang chủ
+# Nút điều hướng quay lại trang chủ Hỏi đáp
 if st.button("⬅️ Quay lại trang Hỏi đáp chính"):
     st.switch_page("giao_dien/cong_dan.py")
 
+st.markdown("---")
 st.title("📖 Giới thiệu Dự án & Ý nghĩa")
 
 # Lấy thông tin tài khoản đang đăng nhập để kiểm tra phân quyền
