@@ -1,66 +1,300 @@
+# -*- coding: utf-8 -*-
+"""LUẬT GẦN BẢN — điểm vào duy nhất của ứng dụng.
+"Chuyển đổi số: không để ai bị bỏ lại phía sau"
+
+File này chỉ làm 3 việc: dựng header, xử lý đăng nhập, và quyết định
+người đang dùng được vào những trang nào (st.navigation).
+
+Chạy:  python -m streamlit run app.py
+"""
+from __future__ import annotations
+
+import base64
+from pathlib import Path
+
+import streamlit as st
+from streamlit.components.v1 import html as _html
+
+from core import auth
+
+ROOT = Path(__file__).resolve().parent
+
+st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
+                   layout="centered", initial_sidebar_state="collapsed")
+
+# ==========================================================================
+# GIAO DIỆN CHUNG & TỐI ƯU GIAO DIỆN HEADER (Sát gọn, chuẩn Responsive)
+# ==========================================================================
 st.markdown("""
 <style>
-  /* ---------- ÉP THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG TRÊN MỌI THIẾT BỊ ---------- */
-  div[data-testid="stHorizontalBlock"]:first-of-type {
-      display: flex !important;
-      flex-direction: row !important;
-      flex-wrap: nowrap !important;
-      align-items: center !important;
-  }
-  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"] {
-      width: auto !important;
-  }
-  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"]:first-child {
-      flex-grow: 1 !important;
-  }
-  div[data-testid="stColumn"]:last-child {
-      flex-shrink: 0 !important;
-  }
-  
-  /* Các thiết lập CSS giao diện khác giữ nguyên như cũ... */
+  /* ---------- phông chữ ---------- */
   .stApp, p, h1,h2,h3,h4,h5,h6, label, button, input, .stMarkdown, .stText, .stTextArea
       { font-family: 'Times New Roman', Times, serif !important; }
+  [data-testid="stExpanderToggleIcon"], [data-testid="stIconMaterial"],
+  [data-testid="stFileUploadDropzone"] span, .st-icon, .material-icons,
+  .material-symbols-rounded
+      { font-family: 'Material Symbols Rounded','Material Icons',sans-serif !important; }
 
-  [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"],
-  [data-testid="manage-app-button"], .stAppDeployButton, #MainMenu, footer,
-  [class*="viewerBadge"], [class*="profileContainer"] { display: none !important; }
+  /* ---------- ẩn thanh công cụ mặc định của Streamlit ---------- */
+  [data-testid="stToolbar"],
+  [data-testid="stDecoration"],
+  [data-testid="stStatusWidget"],
+  [data-testid="manage-app-button"],
+  .stAppDeployButton,
+  #MainMenu,
+  footer,
+  [class*="viewerBadge"],
+  [class*="profileContainer"]        { display: none !important; }
 
+  /* header trong suốt, không chiếm chiều cao */
   header[data-testid="stHeader"] {
       background: transparent !important;
       height: 0 !important;
       min-height: 0 !important;
   }
   
+  /* Ẩn hoàn toàn thanh sidebar mặc định vì đã dùng nút Popover góc trên */
   [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] {
       display: none !important;
   }
 
+  /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
   .block-container { padding-top: 1rem !important; padding-bottom: 3rem !important; max-width: 900px !important; }
 
+  /* Component HTML: bỏ viền */
+  iframe[title="streamlit.components.v1.html"] { border: 0 !important; }
+  iframe[title="streamlit.components.v1.html"][height="0"] {
+      height: 0 !important; display: block !important;
+  }
+
+  /* ---------- header dự án: gom sát gọn lại một dòng, loại bỏ khoảng trắng thừa ---------- */
   .lgb-header {
       display: inline-flex; 
       align-items: center; 
-      gap: 6px; 
+      gap: 6px; /* Khoảng cách siêu khít giữa logo và chữ */
       margin: 0 !important;
       padding: 0 !important;
   }
   .lgb-header img { 
-      height: 28px !important; 
+      height: 30px !important; 
       width: auto !important; 
       object-fit: contain; 
       flex-shrink: 0;
+      margin: 0 !important;
+      padding: 0 !important;
   }
   .lgb-ten {
-      color: #003366; font-size: 16px; font-weight: bold;
+      color: #003366; font-size: 17px; font-weight: bold;
       letter-spacing: .2px; white-space: nowrap;
   }
   .lgb-slogan {
-      color: #666; font-size: 11px; font-style: italic;
-      border-left: 1px solid #ccc; padding-left: 6px; margin-left: 4px;
+      color: #666; font-size: 11.5px; font-style: italic;
+      border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px;
   }
   @media (max-width: 640px) {
-      .lgb-slogan { display: none; }          
-      .lgb-ten    { font-size: 14px; }
+      .lgb-slogan { display: none; }          /* điện thoại: bỏ slogan cho gọn */
+      .lgb-ten    { font-size: 15px; }
   }
+
+  /* ---------- khu ghi âm: nút micro tròn, to ---------- */
+  [data-testid="stAudioInput"] {
+      display: flex !important; justify-content: center !important;
+      height: auto !important; min-height: 240px !important;
+      overflow: visible !important;
+      max-width: 560px; margin: 0 auto !important;
+  }
+  [data-testid="stAudioInput"] > div {
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      gap: 14px !important;
+      width: 100% !important;
+      height: auto !important; min-height: 230px !important;
+      overflow: visible !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      padding-top: 10px !important;
+  }
+  [data-testid="stAudioInput"] > div > div { justify-content: center !important; }
+  [data-testid="stAudioInput"] [data-testid="stElementToolbar"] { display: none !important; }
+  [data-testid="stAudioInputActionButton"] {
+      width: 96px !important; height: 96px !important;
+      min-width: 96px !important; min-height: 96px !important;
+      border-radius: 50% !important;
+      background: #1B7F4B !important;
+      border: 4px solid #d6efe0 !important;
+      box-shadow: 0 6px 18px rgba(27,127,75,.30) !important;
+      animation: lgb-tho 2.4s ease-in-out infinite;
+      position: relative !important;
+  }
+  [data-testid="stAudioInputActionButton"]::before,
+  [data-testid="stAudioInputActionButton"]::after {
+      content: ""; position: absolute; left: 50%; top: 50%;
+      width: 96px; height: 96px; margin: -48px 0 0 -48px;
+      border-radius: 50%; border: 3px solid rgba(27,127,75,.40);
+      pointer-events: none;
+      animation: lgb-song 2.6s ease-out infinite;
+  }
+  [data-testid="stAudioInputActionButton"]::after { animation-delay: 1.3s; }
+  @keyframes lgb-song {
+      0%   { transform: scale(1);   opacity: .65; }
+      100% { transform: scale(1.85); opacity: 0; }
+  }
+  [data-testid="stAudioInputActionButton"]:hover { background: #15653C !important; }
+  [data-testid="stAudioInputActionButton"] svg,
+  [data-testid="stAudioInputActionButton"] path {
+      width: 44px !important; height: 44px !important;
+      fill: #ffffff !important; color: #ffffff !important;
+  }
+  [data-testid="stAudioInputActionButton"][aria-label*="top" i],
+  [data-testid="stAudioInputActionButton"][title*="top" i] {
+      background: #C62828 !important;
+      border-color: #f7d5d5 !important;
+      animation: lgb-thu 1.1s ease-out infinite;
+  }
+  [data-testid="stAudioInputActionButton"][aria-label*="top" i]::before,
+  [data-testid="stAudioInputActionButton"][aria-label*="top" i]::after {
+      display: none !important;
+  }
+  @keyframes lgb-tho {
+      0%,100% { transform: scale(1); }
+      50%     { transform: scale(1.05); }
+  }
+  @keyframes lgb-thu {
+      0%   { box-shadow: 0 0 0 0 rgba(198,40,40,.55); }
+      70%  { box-shadow: 0 0 0 28px rgba(198,40,40,0); }
+      100% { box-shadow: 0 0 0 0 rgba(198,40,40,0); }
+  }
+  [data-testid="stAudioInputWaveSurfer"] { width: 100% !important; min-height: 54px !important; }
+  [data-testid="stAudioInputWaveformTimeCode"] { font-size: 15px !important; }
+
+  /* ---------- nút chọn ngôn ngữ: to, rõ ---------- */
+  [data-testid="stSegmentedControl"] { display: flex; justify-content: center; }
+  [data-testid="stSegmentedControl"] button {
+      font-size: 17px !important; padding: 9px 26px !important; font-weight: 600 !important;
+  }
+
+  /* ---------- chữ trong thẻ trả lời ---------- */
+  .the-tra-loi { font-size: 20px; line-height: 1.65; }
+  .the-tra-loi b { color: #003366; }
+  div[data-testid="stVerticalBlockBorderWrapper"] { border-radius: 10px; }
+  .lgb-phu [data-testid="stExpander"] summary p { font-size: 13px !important; color: #777 !important; }
 </style>
 """, unsafe_allow_html=True)
+
+
+# ==========================================================================
+# DỌN TRANG BAO NGOÀI CỦA STREAMLIT CLOUD
+# ==========================================================================
+_html("""
+<script>
+(function () {
+  function don() {
+    try {
+      var d = window.top.document;
+      if (d.getElementById('lgb-don-trang-bao')) return true;
+      var st = d.createElement('style');
+      st.id = 'lgb-don-trang-bao';
+      st.textContent =
+        '[class*="viewerBadge"],[class*="profileContainer"],' +
+        '[data-testid="manage-app-button"],[class*="manageAppButton"]' +
+        '{display:none !important;}';
+      d.head.appendChild(st);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  if (!don()) {
+    var n = 0;
+    var t = setInterval(function () { if (don() || ++n > 20) clearInterval(t); }, 500);
+  }
+})();
+</script>
+""", height=0)
+
+
+@st.cache_data(show_spinner=False)
+def _logo_b64() -> str:
+    p = ROOT / "logo_hoc_vien.png"
+    return base64.b64encode(p.read_bytes()).decode() if p.exists() else ""
+
+
+# ==========================================================================
+# GIAO DIỆN HEADER & POPOVER ĐĂNG NHẬP TỐI GIẢN (GÓC TRÊN BÊN PHẢI)
+# ==========================================================================
+auth.khoi_tao_mac_dinh()  # Khởi tạo tài khoản mặc định lần đầu
+
+# Chia tỷ lệ cột [7, 1]: Tiêu đề bên trái ôm sát gọn, nút đăng nhập tách riêng góc phải
+col_tieu_de, col_dang_nhap = st.columns([7, 1], vertical_alignment="center")
+
+with col_tieu_de:
+    b64 = _logo_b64()
+    img = (f'<img src="data:image/png;base64,{b64}" alt="">' if b64 else "")
+    st.markdown(
+        f'<div class="lgb-header">{img}'
+        f'<span class="lgb-ten">LUẬT GẦN BẢN</span>'
+        f'<span class="lgb-slogan">Chuyển đổi số: '
+        f'không để ai bị bỏ lại phía sau</span></div>',
+        unsafe_allow_html=True,
+    )
+
+with col_dang_nhap:
+    u = auth.nguoi_dang_nhap()
+    if u:
+        # Đã đăng nhập: Hiển thị icon user gọn nhẹ
+        with st.popover("👤", use_container_width=True, help=f"Đang đăng nhập: {u.get('ten_dang_nhap')}"):
+            st.markdown(f"**{u.get('mo_ta') or u['ten_dang_nhap']}**")
+            st.caption(f"{'Quản trị viên' if u['vai_tro'] == 'admin' else 'Cán bộ'}")
+            if u.get("phai_doi_mk"):
+                st.warning("Cần đổi mật khẩu.", icon="🔑")
+            if st.button("Đăng xuất", use_container_width=True, key="btn_dx_popover"):
+                del st.session_state["nguoi_dung"]
+                st.rerun()
+    else:
+        # Chưa đăng nhập: Nút chìa khóa tối giản
+        with st.popover("🔑", use_container_width=True, help="Đăng nhập dành cho cán bộ"):
+            st.markdown("##### 🔐 Đăng nhập cán bộ")
+            with st.form("form_dn_popover", clear_on_submit=False):
+                ten = st.text_input("Tên đăng nhập", placeholder="Nhập tài khoản...")
+                mk = st.text_input("Mật khẩu", type="password", placeholder="Nhập mật khẩu...")
+                if st.form_submit_button("Đăng nhập", type="primary", use_container_width=True):
+                    nd = auth.kiem_tra_dang_nhap(ten, mk)
+                    if nd:
+                        st.session_state["nguoi_dung"] = nd
+                        st.success("Thành công!")
+                        st.rerun()
+                    else:
+                        st.error("Sai tài khoản/mật khẩu.")
+
+st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
+
+
+# ============================================================ ĐIỀU HƯỚNG
+if not hasattr(st, "navigation") or not hasattr(st, "Page"):
+    st.error(
+        "Phiên bản Streamlit đang cài quá cũ (cần từ **1.36** trở lên).\n\n"
+        "Mở terminal ở thư mục dự án và chạy:\n\n"
+        "```\npip install -U streamlit\n```"
+    )
+    st.stop()
+
+# Khai báo danh sách trang trong hệ thống (Hỏi đáp, Giới thiệu, Quản trị, Tài khoản)
+trang = [
+    st.Page("giao_dien/cong_dan.py", title="Hỏi đáp thủ tục",
+             icon=":material/record_voice_over:", default=True),
+    st.Page("giao_dien/gioi_thieu.py", title="Giới thiệu dự án",
+             icon=":material/info:")
+]
+
+u = auth.nguoi_dang_nhap()
+if u and (auth.la_admin() or auth.quyen_cua(u)):
+    trang.append(st.Page("giao_dien/quan_tri.py", title="Quản trị kho",
+                         icon=":material/settings:"))
+if auth.la_admin():
+    trang.append(st.Page("giao_dien/tai_khoan.py", title="Tài khoản & phân quyền",
+                         icon=":material/manage_accounts:"))
+
+# Chạy điều hướng ẩn sidebar, quản lý các trang thông qua nút điều hướng trong giao diện
+st.navigation(trang, position="hidden").run()
