@@ -12,11 +12,11 @@ from core import auth
 st.markdown("""
 <style>
     .block-container {
-        padding-top: 1rem !important;
+        padding-top: 0.8rem !important;
         padding-bottom: 2rem !important;
         max-width: 100% !important;
     }
-    header {visibility: hidden;} /* Ẩn header mặc định của Streamlit nếu tạo khoảng trắng lớn */
+    header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -128,13 +128,77 @@ def docx_to_exact_html(docx_file) -> str:
 if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
-# Nút điều hướng gọn gàng
-col1, col2 = st.columns([1, 4])
-with col1:
-    if st.button("⬅️ Quay lại", use_container_width=True):
-        st.switch_page("giao_dien/cong_dan.py")
+# ==============================================================================
+# THANH TIÊU ĐỀ TRÊN CÙNG: GOM TRỌN TRÊN 1 HÀNG NGANG DUY NHẤT
+# ==============================================================================
+st.markdown("""
+<div style="
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    background: #ffffff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+">
+    <!-- Cột trái: Nút quay lại -->
+    <div>
+        <a href="cong_dan" target="_self" style="
+            text-decoration: none;
+            background: #f0f2f6;
+            color: #31333F;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-block;
+        ">⬅️ Quay lại</a>
+    </div>
 
-st.markdown("<h2 style='text-align: center; color: #003366; margin-top: 0;'>📖 Giới thiệu Dự án & Ý nghĩa</h2>", unsafe_allow_html=True)
+    <!-- Cột giữa: Logo, Tên dự án và Slogan gom chuẩn 1 hàng -->
+    <div style="
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: nowrap;
+        overflow: hidden;
+    ">
+        <div style="
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-weight: bold;
+            color: #d32f2f;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        ">APAG</div>
+        <div style="
+            font-size: clamp(15px, 2vw, 20px);
+            font-weight: bold;
+            color: #0B4F9E;
+            font-family: 'Times New Roman', Times, serif;
+            white-space: nowrap;
+        ">LUẬT GẦN BẢN</div>
+        <div style="color: #ccc; font-weight: 300;">|</div>
+        <div style="
+            font-size: clamp(11px, 1.3vw, 13px);
+            color: #666;
+            font-style: italic;
+            font-family: 'Times New Roman', Times, serif;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        ">Chuyển đổi số: Không để ai bị bỏ lại phía sau</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 u = auth.nguoi_dang_nhap()
 
@@ -158,7 +222,9 @@ if u and u.get("vai_tro") == "admin":
                         st.success("Cập nhật thành công!")
                         st.rerun()
 
-# Khung hiển thị nội dung chính với chuẩn Responsive tuyệt đối
+st.markdown("<h2 style='text-align: center; color: #003366; margin-top: 10px; font-size: clamp(20px, 3vw, 26px);'>📖 Giới thiệu Dự án & Ý nghĩa</h2>", unsafe_allow_html=True)
+
+# Khung hiển thị nội dung chính với chuẩn Responsive tuyệt đối cho PC và Mobile
 document_html = f"""
 <div style="
     background: #ffffff;
