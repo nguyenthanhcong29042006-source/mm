@@ -23,12 +23,7 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG
-#
-# Nguyên tắc: màn hình của bà con chỉ nên có MỘT thứ nổi bật — nút micro.
-# Mọi thứ Streamlit tự thêm vào (thanh Deploy, menu ⋮, huy hiệu GitHub, đồng
-# hồ chạy ở góc) đều bị ẩn, vì bà con không hiểu chúng là gì và rất dễ bấm
-# nhầm.
+# GIAO DIỆN CHUNG & ĐỒNG BỘ RESPONSIVE MOBILE GIỐNG DESKTOP
 # ==========================================================================
 st.markdown("""
 <style>
@@ -49,20 +44,17 @@ st.markdown("""
       flex-shrink: 0 !important;
   }
 
-  /* ---------- TỐI ƯU NÚT ST.PAGE_LINK TRÊN MOBILE (Không bị cắt chữ, căn giữa gọn gàng) ---------- */
+  /* ---------- ĐỒNG BỘ NÚT ST.PAGE_LINK GỌN GÀNG NHƯ DESKTOP (Không bị dãn toàn màn hình) ---------- */
   [data-testid="stPageLink"] {
-      width: 100% !important;
-      max-width: 100% !important;
-      display: flex !important;
-      justify-content: center !important;
+      width: fit-content !important;
+      max-width: fit-content !important;
+      display: inline-flex !important;
       align-items: center !important;
-      text-align: center !important;
-      box-sizing: border-box !important;
       background-color: #fcfcfc !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
-      padding: 8px 14px !important;
-      margin: 5px 0 !important;
+      padding: 6px 14px !important;
+      margin: 4px 0 !important;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
       transition: all 0.25s ease-in-out !important;
   }
@@ -72,9 +64,7 @@ st.markdown("""
       box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
   }
   [data-testid="stPageLink"] span {
-      white-space: normal !important;
-      overflow: visible !important;
-      text-overflow: unset !important;
+      white-space: nowrap !important;
       font-family: 'Times New Roman', Times, serif !important;
       font-size: 15px !important;
       color: #003366 !important;
