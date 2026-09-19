@@ -7,6 +7,34 @@ from pathlib import Path
 from core import auth
 
 # ==============================================================================
+# TỐI ƯU HÓA KHOẢNG TRẮNG & GIAO DIỆN RESPONSIVE (Cả PC & Mobile)
+# ==============================================================================
+st.markdown("""
+<style>
+    /* Ẩn thanh header mặc định của Streamlit gây khoảng trắng thừa phía trên */
+    .stApp > header {
+        display: none !important;
+    }
+    
+    /* Thu hẹp khoảng đệm của container chính, loại bỏ khoảng trống lớn */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 100% !important;
+    }
+    
+    /* Tự động tối ưu riêng cho màn hình điện thoại di động */
+    @media screen and (max-width: 768px) {
+        .block-container {
+            padding-top: 0.5rem !important;
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# ==============================================================================
 # CƠ CHẾ LƯU TRỮ FILE CỨNG AN TOÀN (Mã hóa UTF-8 chống lỗi font)
 # ==============================================================================
 DATA_FILE = "data/gioi_thieu.md"
@@ -22,7 +50,6 @@ def load_intro_content():
     except Exception:
         pass
     
-    # Nội dung mặc định chuẩn tiếng Việt nếu file trống hoặc lỗi
     return """<h2 style="text-align: center; color: #003366;">GIỚI THIỆU DỰ ÁN</h2>
 <h2 style="text-align: center; color: #003366;">LUẬT GẦN BẢN</h2>
 <p style="text-align: center;"><b>Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số</b></p>
@@ -53,7 +80,6 @@ def docx_to_exact_html(docx_file) -> str:
         html_parts = []
         
         for p in doc.paragraphs:
-            # Xác định căn lề chuẩn
             align_style = "text-align: left;"
             if p.alignment == WD_ALIGN_PARAGRAPH.CENTER:
                 align_style = "text-align: center;"
@@ -66,7 +92,6 @@ def docx_to_exact_html(docx_file) -> str:
             for run in p.runs:
                 text = run.text
                 if not text:
-                    # Trích xuất hình ảnh nhúng bên trong đoạn văn bản
                     try:
                         drawings = run._r.xpath('.//a:blip')
                         for blip in drawings:
@@ -80,9 +105,7 @@ def docx_to_exact_html(docx_file) -> str:
                         pass
                     continue
                 
-                # Chống lỗi ký tự đặc biệt (XSS/HTML Escaping an toàn tuyệt đối)
                 safe_text = html.escape(text)
-                
                 style_runs = []
                 if run.bold:
                     safe_text = f"<b>{safe_text}</b>"
@@ -110,7 +133,6 @@ def docx_to_exact_html(docx_file) -> str:
                 
                 html_parts.append(f'<{tag} style="{align_style} margin-bottom: 12px;">{full_p_text}</{tag}>')
         
-        # Xử lý bảng biểu (tables) chuẩn xác với cuộn ngang trên mobile
         for table in doc.tables:
             table_html = ['<div style="overflow-x: auto; margin: 20px 0;"><table style="border-collapse: collapse; width: 100%;">']
             for row in table.rows:
@@ -126,23 +148,18 @@ def docx_to_exact_html(docx_file) -> str:
         st.error(f"Không thể đọc file Word: {e}")
         return ""
 
-# Nạp dữ liệu vào bộ nhớ tạm an toàn
 if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
-# Nút điều hướng quay lại trang chủ Hỏi đáp
+# Nút điều hướng gọn gàng sát lề trên
 if st.button("⬅️ Quay lại trang Hỏi đáp chính"):
     st.switch_page("giao_dien/cong_dan.py")
 
-st.markdown("---")
+st.markdown("<hr style='margin: 8px 0;'>", unsafe_allow_html=True)
 st.title("📖 Giới thiệu Dự án & Ý nghĩa")
 
-# Lấy thông tin tài khoản đang đăng nhập để kiểm tra phân quyền
 u = auth.nguoi_dang_nhap()
 
-# ==============================================================================
-# LOGIC PHÂN QUYỀN ADMIN: Quản trị nội dung an toàn, mượt mà
-# ==============================================================================
 if u and u.get("vai_tro") == "admin":
     with st.expander("⚙️ BẢNG ĐIỀU KHIỂN ADMIN - CHỈNH SỬA NỘI DUNG", expanded=False):
         st.warning("Bạn đang đăng nhập bằng tài khoản Quản trị viên. Mọi thay đổi sẽ được lưu vĩnh viễn vào hệ thống.")
@@ -167,7 +184,6 @@ if u and u.get("vai_tro") == "admin":
             
             if uploaded_file is not None:
                 file_content = ""
-                
                 if uploaded_file.name.endswith(".docx"):
                     file_content = docx_to_exact_html(uploaded_file)
                 else:
@@ -195,7 +211,7 @@ if u and u.get("vai_tro") == "admin":
                             st.success("Đã cập nhật nội dung chuẩn định dạng từ file thành công!")
                             st.rerun()
                 
-    st.markdown("---")
+    st.markdown("<hr style='margin: 8px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
 # HIỂN THỊ NỘI DUNG CHÍNH (Responsive chuẩn mực hoàn hảo cho cả PC và Mobile)
@@ -205,7 +221,7 @@ document_html = f"""
     background: #ffffff;
     color: #111111;
     padding: clamp(15px, 4vw, 50px);
-    margin: 10px auto;
+    margin: 5px auto;
     max-width: 900px;
     width: 100%;
     border-radius: 6px;
