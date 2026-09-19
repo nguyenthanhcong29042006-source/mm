@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import streamlit as st
 import os
+import zipfile
 from pathlib import Path
 from core import auth
 
@@ -42,7 +43,7 @@ st.title("📖 Giới thiệu Dự án & Ý nghĩa")
 u = auth.nguoi_dang_nhap()
 
 # ==============================================================================
-# LOGIC PHÂN QUYỀN ADMIN: Soạn thảo trực tiếp hoặc Tải file lên (.md, .txt, .docx)
+# LOGIC PHÂN QUYỀN ADMIN: Soạn thảo trực tiếp hoặc Tải file lên (Hỗ trợ bóc tách cả Ảnh)
 # ==============================================================================
 if u and u.get("vai_tro") == "admin":
     with st.expander("⚙️ BẢNG ĐIỀU KHIỂN ADMIN - CHỈNH SỬA NỘI DUNG", expanded=False):
@@ -63,35 +64,57 @@ if u and u.get("vai_tro") == "admin":
                 st.rerun()
                 
         with tab_file:
-            st.caption("Tải lên file định dạng Markdown, Text hoặc Word (.docx) chứa nội dung mới.")
+            st.caption("Tải lên file Markdown, Text hoặc Word (.docx). Hệ thống sẽ tự động bóc tách cả chữ và hình ảnh.")
             uploaded_file = st.file_uploader("Chọn file tải lên", type=["md", "txt", "docx"])
             
             if uploaded_file is not None:
                 file_text = ""
-                # Xử lý tùy thuộc vào định dạng file người dùng tải lên
+                image_markdowns = []
+                
                 if uploaded_file.name.endswith(".docx"):
                     try:
                         import docx
+                        # 1. Đọc văn bản từ file Word
                         doc = docx.Document(uploaded_file)
-                        file_text = "\n".join([p.text for p in doc.paragraphs])
+                        text_parts = [p.text for p in doc.paragraphs if p.text.strip()]
+                        file_text = "\n\n".join(text_parts)
+                        
+                        # 2. Tự động trích xuất hình ảnh từ file docx (vì docx thực chất là file nén zip)
+                        uploaded_file.seek(0)
+                        img_folder = "data/intro_images"
+                        os.makedirs(img_folder, exist_ok=True)
+                        
+                        with zipfile.ZipFile(uploaded_file, 'r') as z:
+                            for filename in z.namelist():
+                                if filename.startswith('word/media/'):
+                                    img_data = z.read(filename)
+                                    img_name = os.path.basename(filename)
+                                    img_path = os.path.join(img_folder, img_name)
+                                    with open(img_path, "wb") as img_file:
+                                        img_file.write(img_data)
+                                    # Tạo cú pháp Markdown hiển thị ảnh tự động
+                                    image_markdowns.append(f"\n\n![{img_name}]({img_path})\n\n")
+                                    
+                        # Ghép văn bản và các hình ảnh trích xuất được vào nhau
+                        file_text = file_text + "".join(image_markdowns)
+                        
                     except ImportError:
-                        st.error("Hệ thống chưa cài thư viện đọc file Word (`python-docx`). Hãy cài bổ sung vào requirements.txt.")
+                        st.error("Hệ thống chưa cài thư viện `python-docx` trong requirements.txt.")
                     except Exception as e:
-                        st.error(f"Lỗi đọc file Word: {e}")
+                        st.error(f"Lỗi xử lý file Word: {e}")
                 else:
-                    # Xử lý file .md hoặc .txt
                     try:
                         file_text = uploaded_file.read().decode("utf-8")
                     except Exception:
                         file_text = uploaded_file.read().decode("latin-1")
                 
                 if file_text:
-                    st.text_area("Xem trước nội dung trích xuất từ file:", value=file_text, height=200, disabled=True)
+                    st.text_area("Xem trước nội dung (bao gồm cả ảnh trích xuất):", value=file_text, height=200, disabled=True)
                     
                     if st.button("🚀 Xác nhận cập nhật từ file", type="primary"):
                         st.session_state["intro_content"] = file_text
                         save_intro_content(file_text)
-                        st.success("Đã cập nhật nội dung từ file lên hệ thống thành công!")
+                        st.success("Đã cập nhật nội dung và hình ảnh từ file lên hệ thống thành công!")
                         st.rerun()
                 
     st.markdown("---")
@@ -99,4 +122,4 @@ if u and u.get("vai_tro") == "admin":
 # ==============================================================================
 # HIỂN THỊ NỘI DUNG CHÍNH (Áp dụng cho mọi người dùng)
 # ==============================================================================
-st.markdown(st.session_state["intro_content"])
+st.markdown(st.session_state["intro_content"], unsafe_allow_html=True)
