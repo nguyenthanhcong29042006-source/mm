@@ -24,11 +24,6 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
 
 # ==========================================================================
 # GIAO DIỆN CHUNG
-#
-# Nguyên tắc: màn hình của bà con chỉ nên có MỘT thứ nổi bật — nút micro.
-# Mọi thứ Streamlit tự thêm vào (thanh Deploy, menu ⋮, huy hiệu GitHub, đồng
-# hồ chạy ở góc) đều bị ẩn, vì bà con không hiểu chúng là gì và rất dễ bấm
-# nhầm.
 # ==========================================================================
 st.markdown("""
 <style>
@@ -64,33 +59,31 @@ st.markdown("""
   }
 
   /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
-  .block-container { padding-top: 2.2rem !important; padding-bottom: 3rem !important; }
+  .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; max-width: 900px !important; }
 
-  /* Component HTML: bỏ viền. Riêng cái cao 0 (đoạn JS dọn trang bao) thì
-     không được chiếm chỗ. KHÔNG ẩn tất cả — nút loa cũng là component. */
+  /* Component HTML: bỏ viền */
   iframe[title="streamlit.components.v1.html"] { border: 0 !important; }
   iframe[title="streamlit.components.v1.html"][height="0"] {
       height: 0 !important; display: block !important;
   }
 
-  /* ---------- header dự án: gom về MỘT dòng ---------- */
+  /* ---------- header dự án: gom sát gọn lại một dòng ---------- */
   .lgb-header {
-      display: flex; align-items: center; gap: 10px;
-      padding-bottom: 8px; margin-bottom: 14px;
-      border-bottom: 1px solid #e3e6ea;
+      display: flex; align-items: center; gap: 8px;
+      padding-bottom: 4px; 
   }
-  .lgb-header img { width: 34px; height: 34px; object-fit: contain; flex-shrink: 0; }
+  .lgb-header img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
   .lgb-ten {
       color: #003366; font-size: 17px; font-weight: bold;
-      letter-spacing: .3px; white-space: nowrap;
+      letter-spacing: .2px; white-space: nowrap;
   }
   .lgb-slogan {
       color: #666; font-size: 11.5px; font-style: italic;
-      border-left: 1px solid #ccc; padding-left: 10px; margin-left: 8px;
+      border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px;
   }
   @media (max-width: 640px) {
       .lgb-slogan { display: none; }          /* điện thoại: bỏ slogan cho gọn */
-      .lgb-ten    { font-size: 16px; }
+      .lgb-ten    { font-size: 15px; }
   }
 
   /* ---------- khu ghi âm: nút micro tròn, to ---------- */
@@ -135,7 +128,7 @@ st.markdown("""
   }
   [data-testid="stAudioInputActionButton"]::after { animation-delay: 1.3s; }
   @keyframes lgb-song {
-      0%   { transform: scale(1);    opacity: .65; }
+      0%   { transform: scale(1);   opacity: .65; }
       100% { transform: scale(1.85); opacity: 0; }
   }
   [data-testid="stAudioInputActionButton"]:hover { background: #15653C !important; }
@@ -218,8 +211,15 @@ def _logo_b64() -> str:
     return base64.b64encode(p.read_bytes()).decode() if p.exists() else ""
 
 
-def header() -> None:
-    """Header một dòng — nhường toàn bộ màn hình cho nút micro."""
+# ==========================================================================
+# GIAO DIỆN HEADER & POPOVER ĐĂNG NHẬP TỐI GIẢN (GÓC TRÊN BÊN PHẢI)
+# ==========================================================================
+auth.khoi_tao_mac_dinh()  # Khởi tạo tài khoản mặc định lần đầu
+
+# Tối ưu hóa tỷ lệ chia cột để tiêu đề nằm gọn bên trái, nút chìa khóa nằm độc lập sát góc phải
+col_tieu_de, col_dang_nhap = st.columns([5.2, 0.8], vertical_alignment="center")
+
+with col_tieu_de:
     b64 = _logo_b64()
     img = (f'<img src="data:image/png;base64,{b64}" alt="">' if b64 else "")
     st.markdown(
@@ -229,18 +229,6 @@ def header() -> None:
         f'không để ai bị bỏ lại phía sau</span></div>',
         unsafe_allow_html=True,
     )
-
-
-# ==========================================================================
-# GIAO DIỆN HEADER & POPOVER ĐĂNG NHẬP TỐI GIẢN (GÓC TRÊN BÊN PHẢI)
-# ==========================================================================
-auth.khoi_tao_mac_dinh()  # Khởi tạo tài khoản mặc định lần đầu
-
-# Tỷ lệ cột: Dồn diện tích cho tiêu đề, nút đăng nhập thu gọn bên phải
-col_tieu_de, col_dang_nhap = st.columns([4.3, 0.7])
-
-with col_tieu_de:
-    header()
 
 with col_dang_nhap:
     u = auth.nguoi_dang_nhap()
@@ -269,6 +257,8 @@ with col_dang_nhap:
                         st.rerun()
                     else:
                         st.error("Sai tài khoản/mật khẩu.")
+
+st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
 
 
 # ============================================================ ĐIỀU HƯỚNG
