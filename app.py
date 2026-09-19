@@ -23,7 +23,7 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & TỐI ƯU CĂN TRÁI (ĐẦU DÒNG) CHO NÚT ĐIỀU HƯỚNG
+# GIAO DIỆN CHUNG & TỐI ƯU ĐỒNG BỘ CĂN TRÁI TUYỆT ĐỐI CHO MỌI THIẾT BỊ
 # ==========================================================================
 st.markdown("""
 <style>
@@ -44,8 +44,8 @@ st.markdown("""
       width: auto !important;
   }
 
-  /* ---------- ĐỒNG BỘ NÚT ST.PAGE_LINK: LUÔN NẰM SÁT ĐẦU DÒNG (BÊN TRÁI) ---------- */
-  div:has(> [data-testid="stPageLink"]) {
+  /* ---------- ÉP NÚT PAGE_LINK DÍNH SÁT LỀ TRÁI (ĐẦU DÒNG) TUYỆT ĐỐI ---------- */
+  div.element-container:has([data-testid="stPageLink"]) {
       display: flex !important;
       justify-content: flex-start !important;
       text-align: left !important;
@@ -73,7 +73,7 @@ st.markdown("""
       box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
   }
   [data-testid="stPageLink"] span {
-      white-space: normal !important;
+      white-space: nowrap !important;
       overflow: visible !important;
       text-overflow: unset !important;
       font-family: 'Times New Roman', Times, serif !important;
