@@ -23,64 +23,10 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG
-#
-# Nguyên tắc: màn hình của bà con chỉ nên có MỘT thứ nổi bật — nút micro.
-# Mọi thứ Streamlit tự thêm vào (thanh Deploy, menu ⋮, huy hiệu GitHub, đồng
-# hồ chạy ở góc) đều bị ẩn, vì bà con không hiểu chúng là gì và rất dễ bấm
-# nhầm.
+# GIAO DIỆN CHUNG & TỐI ƯU RESPONSIVE TRÊN MOBILE (Không bị tràn/mất chữ)
 # ==========================================================================
 st.markdown("""
 <style>
-  /* ---------- ÉP THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG TRÊN MỌI THIẾT BỊ ---------- */
-  div[data-testid="stHorizontalBlock"]:first-of-type {
-      display: flex !important;
-      flex-direction: row !important;
-      flex-wrap: nowrap !important;
-      align-items: center !important;
-  }
-  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"] {
-      width: auto !important;
-  }
-  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"]:first-child {
-      flex-grow: 1 !important;
-  }
-  div[data-testid="stColumn"]:last-child {
-      flex-shrink: 0 !important;
-  }
-
-  /* ---------- TỐI ƯU NÚT ST.PAGE_LINK TRÊN MOBILE (Không bị cắt chữ, căn giữa gọn gàng) ---------- */
-  [data-testid="stPageLink"] {
-      width: 100% !important;
-      max-width: 100% !important;
-      display: flex !important;
-      justify-content: center !important;
-      align-items: center !important;
-      text-align: center !important;
-      box-sizing: border-box !important;
-      background-color: #fcfcfc !important;
-      border: 1px solid #e2e8f0 !important;
-      border-radius: 8px !important;
-      padding: 8px 14px !important;
-      margin: 5px 0 !important;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
-      transition: all 0.25s ease-in-out !important;
-  }
-  [data-testid="stPageLink"]:hover {
-      background-color: #f1f5f9 !important;
-      border-color: #cbd5e1 !important;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
-  }
-  [data-testid="stPageLink"] span {
-      white-space: normal !important;
-      overflow: visible !important;
-      text-overflow: unset !important;
-      font-family: 'Times New Roman', Times, serif !important;
-      font-size: 15px !important;
-      color: #003366 !important;
-      font-weight: 600 !important;
-  }
-
   /* ---------- phông chữ ---------- */
   .stApp, p, h1,h2,h3,h4,h5,h6, label, button, input, .stMarkdown, .stText, .stTextArea
       { font-family: 'Times New Roman', Times, serif !important; }
@@ -100,45 +46,82 @@ st.markdown("""
   [class*="viewerBadge"],
   [class*="profileContainer"]        { display: none !important; }
 
-  /* header trong suốt, không chiếm chiều cao */
   header[data-testid="stHeader"] {
       background: transparent !important;
       height: 0 !important;
       min-height: 0 !important;
   }
   
-  /* Ẩn hoàn toàn thanh sidebar mặc định vì đã dùng nút Popover góc trên */
   [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] {
       display: none !important;
   }
 
-  /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
-  .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; }
+  .block-container { padding-top: 1rem !important; padding-bottom: 3rem !important; max-width: 900px !important; }
 
-  /* Component HTML: bỏ viền. Riêng cái cao 0 (đoạn JS dọn trang bao) thì
-     không được chiếm chỗ. KHÔNG ẩn tất cả — nút loa cũng là component. */
   iframe[title="streamlit.components.v1.html"] { border: 0 !important; }
   iframe[title="streamlit.components.v1.html"][height="0"] {
       height: 0 !important; display: block !important;
   }
 
-  /* ---------- header dự án: gom về MỘT dòng ---------- */
+  /* ---------- header dự án: co giãn linh hoạt, không bị tràn màn hình mobile ---------- */
   .lgb-header {
-      display: inline-flex; align-items: center; gap: 8px;
-      margin: 0 !important; padding: 0 !important;
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100%;
+      overflow: hidden;
   }
-  .lgb-header img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+  .lgb-header img { 
+      height: 28px !important; 
+      width: auto !important; 
+      object-fit: contain; 
+      flex-shrink: 0;
+  }
   .lgb-ten {
-      color: #003366; font-size: 17px; font-weight: bold;
+      color: #003366; font-size: 16px; font-weight: bold;
       letter-spacing: .2px; white-space: nowrap;
   }
   .lgb-slogan {
-      color: #666; font-size: 11.5px; font-style: italic;
-      border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px;
+      color: #666; font-size: 11px; font-style: italic;
+      border-left: 1px solid #ccc; padding-left: 6px; margin-left: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
   }
+
+  /* Tối ưu riêng cho màn hình điện thoại di động */
   @media (max-width: 640px) {
-      .lgb-slogan { display: none; }          /* điện thoại: bỏ slogan cho gọn */
-      .lgb-ten    { font-size: 15px; }
+      .lgb-slogan { display: none; }          
+      .lgb-ten    { font-size: 13px !important; }
+      .lgb-header img { height: 22px !important; }
+  }
+
+  /* ---------- TỐI ƯU NÚT ST.PAGE_LINK TRÊN MOBILE ---------- */
+  [data-testid="stPageLink"] {
+      width: 100% !important;
+      max-width: 100% !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
+      background-color: #fcfcfc !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 8px !important;
+      padding: 8px 14px !important;
+      margin: 5px 0 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+  }
+  [data-testid="stPageLink"] span {
+      white-space: normal !important;
+      overflow: visible !important;
+      text-overflow: unset !important;
+      font-family: 'Times New Roman', Times, serif !important;
+      font-size: 15px !important;
+      color: #003366 !important;
+      font-weight: 600 !important;
   }
 
   /* ---------- khu ghi âm: nút micro tròn, to ---------- */
@@ -284,8 +267,8 @@ def header() -> None:
 # ==========================================================================
 auth.khoi_tao_mac_dinh()  # Khởi tạo tài khoản mặc định lần đầu
 
-# Tỷ lệ cột: Dồn diện tích cho tiêu đề, nút đăng nhập thu gọn bên phải
-col_tieu_de, col_dang_nhap = st.columns([7, 1], vertical_alignment="center")
+# Tỷ lệ cột cân đối để tiêu đề và nút đăng nhập luôn hiển thị đầy đủ trên màn hình nhỏ
+col_tieu_de, col_dang_nhap = st.columns([6, 1.2], vertical_alignment="center")
 
 with col_tieu_de:
     header()
