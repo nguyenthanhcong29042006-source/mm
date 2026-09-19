@@ -23,12 +23,7 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG
-#
-# Nguyên tắc: màn hình của bà con chỉ nên có MỘT thứ nổi bật — nút micro.
-# Mọi thứ Streamlit tự thêm vào (thanh Deploy, menu ⋮, huy hiệu GitHub, đồng
-# hồ chạy ở góc) đều bị ẩn, vì bà con không hiểu chúng là gì và rất dễ bấm
-# nhầm.
+# GIAO DIỆN CHUNG & TỐI ƯU CSS NÚT GIỚI THIỆU SANG TRỌNG, TỐI GIẢN, CĂN GIỮA
 # ==========================================================================
 st.markdown("""
 <style>
@@ -52,45 +47,46 @@ st.markdown("""
       }
   }
 
-  /* ---------- CANH GIỮA TUYỆT ĐỐI & CHỐNG KHUYẾT CHỮ CHO NÚT ST.PAGE_LINK ---------- */
-  div.element-container:has([data-testid="stPageLink"]) {
+  /* ---------- NÚT CHUYỂN TRANG SANG TRỌNG, TỐI GIẢN, CĂN GIỮA TUYỆT ĐỐI ---------- */
+  .element-container:has([data-testid="stPageLink"]) {
       display: flex !important;
       justify-content: center !important;
       align-items: center !important;
       width: 100% !important;
-      margin: 8px 0 !important;
+      margin: 10px 0 15px 0 !important;
   }
   [data-testid="stPageLink"] {
       display: inline-flex !important;
       justify-content: center !important;
       align-items: center !important;
       margin: 0 auto !important;
-      width: auto !important;
+      width: fit-content !important;
+      min-width: max-content !important;
       max-width: 100% !important;
-      background-color: #fcfcfc !important;
+      background: #ffffff !important;
       border: 1px solid #e2e8f0 !important;
-      border-radius: 8px !important;
+      border-radius: 30px !important;         /* Bo tròn dạng viên thuốc (pill) tinh tế, hiện đại */
       padding: 8px 22px !important;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
-      transition: all 0.25s ease-in-out !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
       box-sizing: border-box !important;
       text-decoration: none !important;
   }
   [data-testid="stPageLink"]:hover {
-      background-color: #f1f5f9 !important;
+      background: #f8fafc !important;
       border-color: #cbd5e1 !important;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+      transform: translateY(-1px);
   }
-  [data-testid="stPageLink"] span, 
-  [data-testid="stPageLink"] div, 
-  [data-testid="stPageLink"] p {
+  [data-testid="stPageLink"] span {
       white-space: nowrap !important;
       overflow: visible !important;
-      text-overflow: unset !important;      /* Triệt tiêu hoàn toàn hiện tượng khuyết chữ / dấu ... */
+      text-overflow: unset !important;      /* Triệt tiêu hoàn toàn dấu chấm lửng (...) */
       font-family: 'Times New Roman', Times, serif !important;
       font-size: 15px !important;
       color: #003366 !important;
       font-weight: 600 !important;
+      letter-spacing: 0.3px !important;
   }
 
   /* ---------- phông chữ ---------- */
