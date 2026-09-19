@@ -23,7 +23,7 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & TỐI ƯU CSS CĂN GIỮA TUYỆT ĐỐI CHO CẢ PC VÀ MOBILE
+# GIAO DIỆN CHUNG & TỐI ƯU CSS CHUYÊN SÂU (Căn giữa tuyệt đối, chống lệch mobile)
 # ==========================================================================
 st.markdown("""
 <style>
@@ -47,27 +47,22 @@ st.markdown("""
       }
   }
 
-  /* ---------- CĂN GIỮA TUYỆT ĐỐI KHUNG CHỨA VÀ NÚT ST.PAGE_LINK ---------- */
-  div:has(> [data-testid="stPageLink"]) {
-      display: flex !important;
-      justify-content: center !important;
-      width: 100% !important;
-      margin: 0 auto !important;
-  }
+  /* ---------- CĂN GIỮA TUYỆT ĐỐI NÚT ST.PAGE_LINK TRÊN MỌI THIẾT BỊ (PC & MOBILE) ---------- */
   [data-testid="stPageLink"] {
+      position: relative !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
       display: inline-flex !important;
       justify-content: center !important;
       align-items: center !important;
-      margin: 0 auto !important;
-      width: fit-content !important;
-      min-width: 200px !important;
       background-color: #fcfcfc !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
-      padding: 8px 18px !important;
+      padding: 8px 20px !important;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
       transition: all 0.25s ease-in-out !important;
       box-sizing: border-box !important;
+      text-decoration: none !important;
   }
   [data-testid="stPageLink"]:hover {
       background-color: #f1f5f9 !important;
@@ -77,7 +72,7 @@ st.markdown("""
   [data-testid="stPageLink"] span {
       white-space: nowrap !important;
       overflow: visible !important;
-      text-overflow: unset !important;
+      text-overflow: unset !important;      /* Triệt tiêu hoàn toàn dấu chấm lửng (...) */
       font-family: 'Times New Roman', Times, serif !important;
       font-size: 15px !important;
       color: #003366 !important;
@@ -118,7 +113,8 @@ st.markdown("""
   /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
   .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; max-width: 900px !important; }
 
-  /* Component HTML: bỏ viền */
+  /* Component HTML: bỏ viền. Riêng cái cao 0 (đoạn JS dọn trang bao) thì
+     không được chiếm chỗ. KHÔNG ẩn tất cả — nút loa cũng là component. */
   iframe[title="streamlit.components.v1.html"] { border: 0 !important; }
   iframe[title="streamlit.components.v1.html"][height="0"] {
       height: 0 !important; display: block !important;
