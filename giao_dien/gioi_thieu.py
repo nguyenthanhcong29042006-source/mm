@@ -126,7 +126,7 @@ if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
 # ==============================================================================
-# HEADER CHUẨN XÁC MỘT HÀNG DUY NHẤT (Khớp tuyệt đối với mẫu yêu cầu)
+# HEADER SẠCH SẼ, GỌN GÀNG (Đã loại bỏ hoàn toàn các đường kẻ ngang thừa)
 # ==============================================================================
 col_logo_title, col_btn_login = st.columns([6, 1], vertical_alignment="center")
 
@@ -146,9 +146,7 @@ with col_btn_login:
     if st.button(btn_label, use_container_width=True, help="Quản lý tài khoản / Đăng nhập"):
         st.switch_page("giao_dien/tai_khoan.py")
 
-st.markdown("<hr style='margin: 12px 0 20px 0;'>", unsafe_allow_html=True)
-
-# Nút quay lại gọn gàng phía trên tiêu đề trang
+# Nút quay lại trang chủ
 if st.button("⬅️ Quay lại trang Hỏi đáp chính"):
     st.switch_page("giao_dien/cong_dan.py")
 
