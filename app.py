@@ -23,11 +23,11 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & CSS CHUYÊN SÂU (Sang trọng, tối giản, căn giữa hoàn hảo)
+# GIAO DIỆN CHUNG & TỐI ƯU HIỆU NĂNG GIAO DIỆN (Sang trọng, Tối giản, Căn giữa)
 # ==========================================================================
 st.markdown("""
 <style>
-  /* ---------- ÉP CỐ ĐỊNH THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG NGANG TRÊN MỌI THIẾT BỊ ---------- */
+  /* ---------- ÉP THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG TRÊN MỌI THIẾT BỊ ---------- */
   @media (max-width: 768px) {
       div[data-testid="stHorizontalBlock"] {
           display: flex !important;
@@ -47,33 +47,28 @@ st.markdown("""
       }
   }
 
-  /* ---------- TỐI ƯU NÚT "GIỚI THIỆU DỰ ÁN": SANG TRỌNG, TỐI GIẢN & CĂN GIỮA TUYỆT ĐỐI ---------- */
-  
-  /* Hỗ trợ căn giữa cho các trình duyệt mới */
+  /* ---------- TỐI ƯU NÚT "GIỚI THIỆU DỰ ÁN": CĂN GIỮA TUYỆT ĐỐI, TỐI GIẢN SANG TRỌNG ---------- */
   .element-container:has([data-testid="stPageLink"]) {
       display: flex !important;
       justify-content: center !important;
+      align-items: center !important;
       width: 100% !important;
-      margin: 5px 0 !important;
+      margin: 6px 0 !important;
   }
-  
-  /* Thiết kế nút dạng viên thuốc (Pill shape) hiện đại, không bao giờ khuyết chữ */
   [data-testid="stPageLink"] {
-      align-self: center !important; /* Khóa chết ở giữa cho cả các máy iPhone đời cũ */
-      margin: 0 auto !important;
-      display: flex !important;
-      flex-direction: row !important;
+      display: inline-flex !important;
       justify-content: center !important;
       align-items: center !important;
-      width: max-content !important; /* Ép khung ôm vừa khít toàn bộ chữ */
-      min-width: 200px !important;
-      max-width: 90vw !important;
+      margin: 0 auto !important;
+      width: fit-content !important;
+      min-width: max-content !important;
+      max-width: 100% !important;
       background-color: #ffffff !important;
       border: 1px solid #e2e8f0 !important;
-      border-radius: 40px !important; /* Bo tròn sang trọng */
-      padding: 8px 24px !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
-      transition: all 0.3s ease !important;
+      border-radius: 20px !important;             /* Thiết kế dạng viên thuốc bo tròn sang trọng */
+      padding: 7px 22px !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03) !important;
+      transition: all 0.2s ease !important;
       text-decoration: none !important;
   }
   [data-testid="stPageLink"]:hover {
@@ -85,9 +80,9 @@ st.markdown("""
   [data-testid="stPageLink"] span {
       white-space: nowrap !important;
       overflow: visible !important;
-      text-overflow: clip !important; /* Chống xuất hiện dấu 3 chấm (...) */
+      text-overflow: unset !important;          /* Triệt tiêu hoàn toàn dấu 3 chấm (...) */
       font-family: 'Times New Roman', Times, serif !important;
-      font-size: 15.5px !important;
+      font-size: 15px !important;
       color: #003366 !important;
       font-weight: 600 !important;
       letter-spacing: 0.2px !important;
@@ -342,7 +337,7 @@ if not hasattr(st, "navigation") or not hasattr(st, "Page"):
     )
     st.stop()
 
-# Khai báo danh sách trang trong hệ thống (Hỏi đáp, Giới thiệu, Quản trị, Tài khoản)
+# Khai báo danh sách trang trong hệ thống (Tinh chỉnh biểu tượng Material Info tối giản & sang trọng)
 trang = [
     st.Page("giao_dien/cong_dan.py", title="Hỏi đáp thủ tục",
              icon=":material/record_voice_over:", default=True),
