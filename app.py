@@ -23,30 +23,33 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & ĐỒNG BỘ RESPONSIVE MOBILE GIỐNG DESKTOP
+# GIAO DIỆN CHUNG & ĐỒNG BỘ GIAO DIỆN MOBILE GIỐNG HỆT DESKTOP
 # ==========================================================================
 st.markdown("""
 <style>
-  /* ---------- ÉP THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG TRÊN MỌI THIẾT BỊ ---------- */
-  div[data-testid="stHorizontalBlock"]:first-of-type {
-      display: flex !important;
-      flex-direction: row !important;
-      flex-wrap: nowrap !important;
-      align-items: center !important;
-  }
-  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"] {
-      width: auto !important;
-  }
-  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"]:first-child {
-      flex-grow: 1 !important;
-  }
-  div[data-testid="stColumn"]:last-child {
-      flex-shrink: 0 !important;
+  /* ---------- ÉP CỐ ĐỊNH: KHÔNG CHO PHÉP CỘT BỊ XẾP CHỒNG (RỚT DÒNG) TRÊN MOBILE ---------- */
+  @media (max-width: 768px) {
+      div[data-testid="stHorizontalBlock"] {
+          display: flex !important;
+          flex-direction: row !important;
+          flex-wrap: nowrap !important;
+          align-items: center !important;
+          width: 100% !important;
+      }
+      div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
+          flex: 1 1 auto !important;
+          min-width: 0 !important;
+          width: auto !important;
+      }
+      div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child {
+          flex: 0 0 auto !important;
+          width: auto !important;
+      }
   }
 
   /* ---------- ĐỒNG BỘ NÚT ST.PAGE_LINK GỌN GÀNG NHƯ DESKTOP (Không bị dãn toàn màn hình) ---------- */
   [data-testid="stPageLink"] {
-      width: fit-content !important;
+      width: auto !important;
       max-width: fit-content !important;
       display: inline-flex !important;
       align-items: center !important;
