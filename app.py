@@ -23,7 +23,7 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG
+# GIAO DIỆN CHUNG & TỐI ƯU GIAO DIỆN HEADER (Sát gọn, chuẩn Responsive)
 # ==========================================================================
 st.markdown("""
 <style>
@@ -59,7 +59,7 @@ st.markdown("""
   }
 
   /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
-  .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; max-width: 900px !important; }
+  .block-container { padding-top: 1rem !important; padding-bottom: 3rem !important; max-width: 900px !important; }
 
   /* Component HTML: bỏ viền */
   iframe[title="streamlit.components.v1.html"] { border: 0 !important; }
@@ -67,12 +67,22 @@ st.markdown("""
       height: 0 !important; display: block !important;
   }
 
-  /* ---------- header dự án: gom sát gọn lại một dòng ---------- */
+  /* ---------- header dự án: gom sát gọn lại một dòng, loại bỏ khoảng trắng thừa ---------- */
   .lgb-header {
-      display: flex; align-items: center; gap: 8px;
-      padding-bottom: 4px; 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px; /* Khoảng cách siêu khít giữa logo và chữ */
+      margin: 0 !important;
+      padding: 0 !important;
   }
-  .lgb-header img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+  .lgb-header img { 
+      height: 30px !important; 
+      width: auto !important; 
+      object-fit: contain; 
+      flex-shrink: 0;
+      margin: 0 !important;
+      padding: 0 !important;
+  }
   .lgb-ten {
       color: #003366; font-size: 17px; font-weight: bold;
       letter-spacing: .2px; white-space: nowrap;
@@ -216,8 +226,8 @@ def _logo_b64() -> str:
 # ==========================================================================
 auth.khoi_tao_mac_dinh()  # Khởi tạo tài khoản mặc định lần đầu
 
-# Tối ưu hóa tỷ lệ chia cột để tiêu đề nằm gọn bên trái, nút chìa khóa nằm độc lập sát góc phải
-col_tieu_de, col_dang_nhap = st.columns([5.2, 0.8], vertical_alignment="center")
+# Chia tỷ lệ cột [7, 1]: Tiêu đề bên trái ôm sát gọn, nút đăng nhập tách riêng góc phải
+col_tieu_de, col_dang_nhap = st.columns([7, 1], vertical_alignment="center")
 
 with col_tieu_de:
     b64 = _logo_b64()
