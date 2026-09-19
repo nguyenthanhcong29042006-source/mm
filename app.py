@@ -23,43 +23,43 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & ĐỒNG BỘ GIAO DIỆN MOBILE GIỐNG HỆT DESKTOP
+# GIAO DIỆN CHUNG & ĐỒNG BỘ GIAO DIỆN DESKTOP & MOBILE HOÀN HẢO
 # ==========================================================================
 st.markdown("""
 <style>
-  /* ---------- ÉP CỐ ĐỊNH: KHÔNG CHO PHÉP CỘT BỊ XẾP CHỒNG (RỚT DÒNG) TRÊN MOBILE ---------- */
-  @media (max-width: 768px) {
-      div[data-testid="stHorizontalBlock"] {
-          display: flex !important;
-          flex-direction: row !important;
-          flex-wrap: nowrap !important;
-          align-items: center !important;
-          width: 100% !important;
-      }
-      div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
-          flex: 1 1 auto !important;
-          min-width: 0 !important;
-          width: auto !important;
-      }
-      div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child {
-          flex: 0 0 auto !important;
-          width: auto !important;
-      }
+  /* ---------- ÉP CỐ ĐỊNH THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG NGANG ---------- */
+  div[data-testid="stHorizontalBlock"]:first-of-type {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
+      width: 100% !important;
+  }
+  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"] {
+      min-width: 0 !important;
+      flex: 1 1 auto !important;
+  }
+  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"]:last-child {
+      flex: 0 0 auto !important;
+      width: auto !important;
   }
 
-  /* ---------- ĐỒNG BỘ NÚT ST.PAGE_LINK GỌN GÀNG NHƯ DESKTOP (Không bị dãn toàn màn hình) ---------- */
-  [data-testid="stPageLink"] {
-      width: auto !important;
-      max-width: fit-content !important;
-      display: inline-flex !important;
+  /* ---------- ĐỒNG BỘ NÚT ST.PAGE_LINK TRÊN MỌI THIẾT BỊ (Không khuyết chữ, luôn ở giữa, chống tràn) ---------- */
+  div[data-testid="stPageLink"], [data-testid="stPageLink"] {
+      display: flex !important;
+      justify-content: center !important;
       align-items: center !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      width: fit-content !important;
+      max-width: 100% !important;
       background-color: #fcfcfc !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
-      padding: 6px 14px !important;
-      margin: 4px 0 !important;
+      padding: 8px 18px !important;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
       transition: all 0.25s ease-in-out !important;
+      box-sizing: border-box !important;
   }
   [data-testid="stPageLink"]:hover {
       background-color: #f1f5f9 !important;
@@ -68,6 +68,8 @@ st.markdown("""
   }
   [data-testid="stPageLink"] span {
       white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: unset !important;
       font-family: 'Times New Roman', Times, serif !important;
       font-size: 15px !important;
       color: #003366 !important;
@@ -93,23 +95,18 @@ st.markdown("""
   [class*="viewerBadge"],
   [class*="profileContainer"]        { display: none !important; }
 
-  /* header trong suốt, không chiếm chiều cao */
   header[data-testid="stHeader"] {
       background: transparent !important;
       height: 0 !important;
       min-height: 0 !important;
   }
   
-  /* Ẩn hoàn toàn thanh sidebar mặc định vì đã dùng nút Popover góc trên */
   [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] {
       display: none !important;
   }
 
-  /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
   .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; }
 
-  /* Component HTML: bỏ viền. Riêng cái cao 0 (đoạn JS dọn trang bao) thì
-     không được chiếm chỗ. KHÔNG ẩn tất cả — nút loa cũng là component. */
   iframe[title="streamlit.components.v1.html"] { border: 0 !important; }
   iframe[title="streamlit.components.v1.html"][height="0"] {
       height: 0 !important; display: block !important;
@@ -117,21 +114,30 @@ st.markdown("""
 
   /* ---------- header dự án: gom về MỘT dòng ---------- */
   .lgb-header {
-      display: inline-flex; align-items: center; gap: 8px;
-      margin: 0 !important; padding: 0 !important;
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px;
+      margin: 0 !important; 
+      padding: 0 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
   }
-  .lgb-header img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+  .lgb-header img { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
   .lgb-ten {
-      color: #003366; font-size: 17px; font-weight: bold;
+      color: #003366; font-size: 16px; font-weight: bold;
       letter-spacing: .2px; white-space: nowrap;
   }
   .lgb-slogan {
-      color: #666; font-size: 11.5px; font-style: italic;
-      border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px;
+      color: #666; font-size: 11px; font-style: italic;
+      border-left: 1px solid #ccc; padding-left: 6px; margin-left: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
   }
   @media (max-width: 640px) {
-      .lgb-slogan { display: none; }          /* điện thoại: bỏ slogan cho gọn */
-      .lgb-ten    { font-size: 15px; }
+      .lgb-slogan { display: none; }          
+      .lgb-ten    { font-size: 14px; }
   }
 
   /* ---------- khu ghi âm: nút micro tròn, to ---------- */
