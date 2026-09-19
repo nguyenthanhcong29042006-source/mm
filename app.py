@@ -52,8 +52,8 @@ st.markdown("""
       }
   }
 
-  /* ---------- CĂN GIỮA TUYỆT ĐỐI NÚT ST.PAGE_LINK (Hiển thị trọn vẹn, không khuyết chữ) ---------- */
-  .element-container:has([data-testid="stPageLink"]) {
+  /* ---------- CANH GIỮA TUYỆT ĐỐI & CHỐNG KHUYẾT CHỮ CHO NÚT ST.PAGE_LINK ---------- */
+  div.element-container:has([data-testid="stPageLink"]) {
       display: flex !important;
       justify-content: center !important;
       align-items: center !important;
@@ -65,13 +65,12 @@ st.markdown("""
       justify-content: center !important;
       align-items: center !important;
       margin: 0 auto !important;
-      width: fit-content !important;
-      min-width: max-content !important;
+      width: auto !important;
       max-width: 100% !important;
       background-color: #fcfcfc !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
-      padding: 8px 20px !important;
+      padding: 8px 22px !important;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
       transition: all 0.25s ease-in-out !important;
       box-sizing: border-box !important;
@@ -82,10 +81,12 @@ st.markdown("""
       border-color: #cbd5e1 !important;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
   }
-  [data-testid="stPageLink"] span {
+  [data-testid="stPageLink"] span, 
+  [data-testid="stPageLink"] div, 
+  [data-testid="stPageLink"] p {
       white-space: nowrap !important;
       overflow: visible !important;
-      text-overflow: unset !important;      /* Triệt tiêu hoàn toàn dấu chấm lửng (...) */
+      text-overflow: unset !important;      /* Triệt tiêu hoàn toàn hiện tượng khuyết chữ / dấu ... */
       font-family: 'Times New Roman', Times, serif !important;
       font-size: 15px !important;
       color: #003366 !important;
