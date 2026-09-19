@@ -23,250 +23,74 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & CSS CHUYÊN SÂU (Đồng bộ khung nút Giới thiệu giống nút Quay lại)
+# GIAO DIỆN CHUNG & TỐI ƯU HIỆU NĂNG GIAO DIỆN (Render HTML gốc siêu tốc)
 # ==========================================================================
-st.markdown("""
+# SỬ DỤNG st.html() thay vì st.markdown() để bỏ qua bộ phân tích Markdown, tăng tốc độ render UI
+st.html("""
 <style>
-  /* ---------- ÉP CỐ ĐỊNH THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG NGANG TRÊN MỌI THIẾT BỊ ---------- */
+  /* ÉP THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG TRÊN MỌI THIẾT BỊ */
   @media (max-width: 768px) {
-      div[data-testid="stHorizontalBlock"] {
-          display: flex !important;
-          flex-direction: row !important;
-          flex-wrap: nowrap !important;
-          align-items: center !important;
-          width: 100% !important;
-      }
-      div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
-          flex: 1 1 auto !important;
-          min-width: 0 !important;
-          width: auto !important;
-      }
-      div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child {
-          flex: 0 0 auto !important;
-          width: auto !important;
-      }
+      div[data-testid="stHorizontalBlock"] { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; width: 100% !important; }
+      div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] { flex: 1 1 auto !important; min-width: 0 !important; width: auto !important; }
+      div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child { flex: 0 0 auto !important; width: auto !important; }
   }
 
-  /* ---------- ĐỒNG BỘ KHUNG NÚT "GIỚI THIỆU DỰ ÁN" GIỐNG HỆT NÚT "QUAY LẠI" ---------- */
-  
-  /* Căn giữa container chứa nút */
-  .element-container:has([data-testid="stPageLink"]) {
-      display: flex !important;
-      justify-content: center !important;
-      width: 100% !important;
-      margin: 5px 0 !important;
-  }
-  
-  /* Khung hộp bo góc 8px giống hệt nút ở trang giới thiệu */
-  [data-testid="stPageLink"] {
-      align-self: center !important; 
-      margin: 0 auto !important;
-      display: flex !important;
-      flex-direction: row !important;
-      justify-content: center !important;
-      align-items: center !important;
-      width: max-content !important;      /* Ép khung ôm vừa khít chữ */
-      background-color: #fcfcfc !important;
-      border: 1px solid #e2e8f0 !important;
-      border-radius: 8px !important;      /* Bo góc chuẩn 8px giống nút Quay lại */
-      padding: 6px 14px !important;       /* Padding gọn gàng đồng bộ */
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
-      transition: all 0.25s ease-in-out !important;
-      text-decoration: none !important;
-  }
-  [data-testid="stPageLink"]:hover {
-      background-color: #f1f5f9 !important;
-      border-color: #cbd5e1 !important;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
-      transform: translateY(-1px) !important;
-  }
-  [data-testid="stPageLink"] span {
-      white-space: nowrap !important;
-      overflow: visible !important;
-      text-overflow: clip !important;     /* Chống khuyết chữ, mất chữ trên mobile */
-      font-family: 'Times New Roman', Times, serif !important;
-      font-size: 15px !important;
-      color: #003366 !important;
-      font-weight: 600 !important;
-  }
+  /* NÚT "GIỚI THIỆU DỰ ÁN": CĂN GIỮA TUYỆT ĐỐI, VIÊN THUỐC SANG TRỌNG */
+  .element-container:has([data-testid="stPageLink"]) { display: flex !important; justify-content: center !important; width: 100% !important; margin: 5px 0 !important; }
+  [data-testid="stPageLink"] { align-self: center !important; margin: 0 auto !important; display: flex !important; flex-direction: row !important; justify-content: center !important; align-items: center !important; width: max-content !important; min-width: 200px !important; max-width: 90vw !important; background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 40px !important; padding: 8px 24px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important; transition: all 0.2s ease !important; text-decoration: none !important; }
+  [data-testid="stPageLink"]:hover { background-color: #f8fafc !important; border-color: #cbd5e1 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important; transform: translateY(-1px) !important; }
+  [data-testid="stPageLink"] span { white-space: nowrap !important; overflow: visible !important; text-overflow: clip !important; font-family: 'Times New Roman', Times, serif !important; font-size: 15.5px !important; color: #003366 !important; font-weight: 600 !important; letter-spacing: 0.2px !important; }
 
-  /* ---------- phông chữ ---------- */
-  .stApp, p, h1,h2,h3,h4,h5,h6, label, button, input, .stMarkdown, .stText, .stTextArea
-      { font-family: 'Times New Roman', Times, serif !important; }
-  [data-testid="stExpanderToggleIcon"], [data-testid="stIconMaterial"],
-  [data-testid="stFileUploadDropzone"] span, .st-icon, .material-icons,
-  .material-symbols-rounded
-      { font-family: 'Material Symbols Rounded','Material Icons',sans-serif !important; }
+  /* Phông chữ chung */
+  .stApp, p, h1, h2, h3, h4, h5, h6, label, button, input, .stMarkdown, .stText, .stTextArea { font-family: 'Times New Roman', Times, serif !important; }
+  [data-testid="stExpanderToggleIcon"], [data-testid="stIconMaterial"], [data-testid="stFileUploadDropzone"] span, .st-icon, .material-icons, .material-symbols-rounded { font-family: 'Material Symbols Rounded','Material Icons',sans-serif !important; }
 
-  /* ---------- ẩn thanh công cụ mặc định của Streamlit ---------- */
-  [data-testid="stToolbar"],
-  [data-testid="stDecoration"],
-  [data-testid="stStatusWidget"],
-  [data-testid="manage-app-button"],
-  .stAppDeployButton,
-  #MainMenu,
-  footer,
-  [class*="viewerBadge"],
-  [class*="profileContainer"]        { display: none !important; }
-
-  /* header trong suốt, không chiếm chiều cao */
-  header[data-testid="stHeader"] {
-      background: transparent !important;
-      height: 0 !important;
-      min-height: 0 !important;
-  }
-  
-  /* Ẩn hoàn toàn thanh sidebar mặc định vì đã dùng nút Popover góc trên */
-  [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] {
-      display: none !important;
-  }
-
-  /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
+  /* Ẩn UI mặc định của Streamlit */
+  [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"], [data-testid="manage-app-button"], .stAppDeployButton, #MainMenu, footer, [class*="viewerBadge"], [class*="profileContainer"], [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] { display: none !important; }
+  header[data-testid="stHeader"] { background: transparent !important; height: 0 !important; min-height: 0 !important; }
   .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; max-width: 900px !important; }
-
-  /* Component HTML: bỏ viền. Riêng cái cao 0 (đoạn JS dọn trang bao) thì
-     không được chiếm chỗ. KHÔNG ẩn tất cả — nút loa cũng là component. */
   iframe[title="streamlit.components.v1.html"] { border: 0 !important; }
-  iframe[title="streamlit.components.v1.html"][height="0"] {
-      height: 0 !important; display: block !important;
-  }
+  iframe[title="streamlit.components.v1.html"][height="0"] { height: 0 !important; display: block !important; }
 
-  /* ---------- header dự án: gom về MỘT dòng ---------- */
-  .lgb-header {
-      display: inline-flex; align-items: center; gap: 8px;
-      margin: 0 !important; padding: 0 !important;
-  }
+  /* Header dự án gọn gàng */
+  .lgb-header { display: inline-flex; align-items: center; gap: 8px; margin: 0 !important; padding: 0 !important; }
   .lgb-header img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
-  .lgb-ten {
-      color: #003366; font-size: 17px; font-weight: bold;
-      letter-spacing: .2px; white-space: nowrap;
-  }
-  .lgb-slogan {
-      color: #666; font-size: 11.5px; font-style: italic;
-      border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px;
-  }
-  @media (max-width: 640px) {
-      .lgb-slogan { display: none; }          /* điện thoại: bỏ slogan cho gọn */
-      .lgb-ten    { font-size: 15px; }
-  }
+  .lgb-ten { color: #003366; font-size: 17px; font-weight: bold; letter-spacing: .2px; white-space: nowrap; }
+  .lgb-slogan { color: #666; font-size: 11.5px; font-style: italic; border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px; }
+  @media (max-width: 640px) { .lgb-slogan { display: none; } .lgb-ten { font-size: 15px; } }
 
-  /* ---------- khu ghi âm: nút micro tròn, to ---------- */
-  [data-testid="stAudioInput"] {
-      display: flex !important; justify-content: center !important;
-      height: auto !important; min-height: 240px !important;
-      overflow: visible !important;
-      max-width: 560px; margin: 0 auto !important;
-  }
-  [data-testid="stAudioInput"] > div {
-      flex-direction: column !important;
-      align-items: center !important;
-      justify-content: flex-start !important;
-      gap: 14px !important;
-      width: 100% !important;
-      height: auto !important; min-height: 230px !important;
-      overflow: visible !important;
-      border: none !important;
-      background: transparent !important;
-      box-shadow: none !important;
-      padding-top: 10px !important;
-  }
+  /* Khu ghi âm - Nút micro */
+  [data-testid="stAudioInput"] { display: flex !important; justify-content: center !important; height: auto !important; min-height: 240px !important; overflow: visible !important; max-width: 560px; margin: 0 auto !important; }
+  [data-testid="stAudioInput"] > div { flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; gap: 14px !important; width: 100% !important; height: auto !important; min-height: 230px !important; overflow: visible !important; border: none !important; background: transparent !important; box-shadow: none !important; padding-top: 10px !important; }
   [data-testid="stAudioInput"] > div > div { justify-content: center !important; }
   [data-testid="stAudioInput"] [data-testid="stElementToolbar"] { display: none !important; }
-  [data-testid="stAudioInputActionButton"] {
-      width: 96px !important; height: 96px !important;
-      min-width: 96px !important; min-height: 96px !important;
-      border-radius: 50% !important;
-      background: #1B7F4B !important;
-      border: 4px solid #d6efe0 !important;
-      box-shadow: 0 6px 18px rgba(27,127,75,.30) !important;
-      animation: lgb-tho 2.4s ease-in-out infinite;
-      position: relative !important;
-  }
-  [data-testid="stAudioInputActionButton"]::before,
-  [data-testid="stAudioInputActionButton"]::after {
-      content: ""; position: absolute; left: 50%; top: 50%;
-      width: 96px; height: 96px; margin: -48px 0 0 -48px;
-      border-radius: 50%; border: 3px solid rgba(27,127,75,.40);
-      pointer-events: none;
-      animation: lgb-song 2.6s ease-out infinite;
-  }
+  [data-testid="stAudioInputActionButton"] { width: 96px !important; height: 96px !important; min-width: 96px !important; min-height: 96px !important; border-radius: 50% !important; background: #1B7F4B !important; border: 4px solid #d6efe0 !important; box-shadow: 0 6px 18px rgba(27,127,75,.30) !important; animation: lgb-tho 2.4s ease-in-out infinite; position: relative !important; }
+  [data-testid="stAudioInputActionButton"]::before, [data-testid="stAudioInputActionButton"]::after { content: ""; position: absolute; left: 50%; top: 50%; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; border: 3px solid rgba(27,127,75,.40); pointer-events: none; animation: lgb-song 2.6s ease-out infinite; }
   [data-testid="stAudioInputActionButton"]::after { animation-delay: 1.3s; }
-  @keyframes lgb-song {
-      0%   { transform: scale(1);   opacity: .65; }
-      100% { transform: scale(1.85); opacity: 0; }
-  }
+  @keyframes lgb-song { 0% { transform: scale(1); opacity: .65; } 100% { transform: scale(1.85); opacity: 0; } }
   [data-testid="stAudioInputActionButton"]:hover { background: #15653C !important; }
-  [data-testid="stAudioInputActionButton"] svg,
-  [data-testid="stAudioInputActionButton"] path {
-      width: 44px !important; height: 44px !important;
-      fill: #ffffff !important; color: #ffffff !important;
-  }
-  [data-testid="stAudioInputActionButton"][aria-label*="top" i],
-  [data-testid="stAudioInputActionButton"][title*="top" i] {
-      background: #C62828 !important;
-      border-color: #f7d5d5 !important;
-      animation: lgb-thu 1.1s ease-out infinite;
-  }
-  [data-testid="stAudioInputActionButton"][aria-label*="top" i]::before,
-  [data-testid="stAudioInputActionButton"][aria-label*="top" i]::after {
-      display: none !important;
-  }
-  @keyframes lgb-tho {
-      0%,100% { transform: scale(1); }
-      50%     { transform: scale(1.05); }
-  }
-  @keyframes lgb-thu {
-      0%   { box-shadow: 0 0 0 0 rgba(198,40,40,.55); }
-      70%  { box-shadow: 0 0 0 28px rgba(198,40,40,0); }
-      100% { box-shadow: 0 0 0 0 rgba(198,40,40,0); }
-  }
+  [data-testid="stAudioInputActionButton"] svg, [data-testid="stAudioInputActionButton"] path { width: 44px !important; height: 44px !important; fill: #ffffff !important; color: #ffffff !important; }
+  [data-testid="stAudioInputActionButton"][aria-label*="top" i], [data-testid="stAudioInputActionButton"][title*="top" i] { background: #C62828 !important; border-color: #f7d5d5 !important; animation: lgb-thu 1.1s ease-out infinite; }
+  [data-testid="stAudioInputActionButton"][aria-label*="top" i]::before, [data-testid="stAudioInputActionButton"][aria-label*="top" i]::after { display: none !important; }
+  @keyframes lgb-tho { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @keyframes lgb-thu { 0% { box-shadow: 0 0 0 0 rgba(198,40,40,.55); } 70% { box-shadow: 0 0 0 28px rgba(198,40,40,0); } 100% { box-shadow: 0 0 0 0 rgba(198,40,40,0); } }
   [data-testid="stAudioInputWaveSurfer"] { width: 100% !important; min-height: 54px !important; }
   [data-testid="stAudioInputWaveformTimeCode"] { font-size: 15px !important; }
 
-  /* ---------- nút chọn ngôn ngữ: to, rõ ---------- */
+  /* Nút chọn ngôn ngữ & Văn bản */
   [data-testid="stSegmentedControl"] { display: flex; justify-content: center; }
-  [data-testid="stSegmentedControl"] button {
-      font-size: 17px !important; padding: 9px 26px !important; font-weight: 600 !important;
-  }
-
-  /* ---------- chữ trong thẻ trả lời ---------- */
+  [data-testid="stSegmentedControl"] button { font-size: 17px !important; padding: 9px 26px !important; font-weight: 600 !important; }
   .the-tra-loi { font-size: 20px; line-height: 1.65; }
   .the-tra-loi b { color: #003366; }
   div[data-testid="stVerticalBlockBorderWrapper"] { border-radius: 10px; }
   .lgb-phu [data-testid="stExpander"] summary p { font-size: 13px !important; color: #777 !important; }
 </style>
-""", unsafe_allow_html=True)
-
+""")
 
 # ==========================================================================
-# DỌN TRANG BAO NGOÀI CỦA STREAMLIT CLOUD
+# DỌN TRANG BAO NGOÀI CỦA STREAMLIT CLOUD (Đã nén mã JS)
 # ==========================================================================
-_html("""
-<script>
-(function () {
-  function don() {
-    try {
-      var d = window.top.document;
-      if (d.getElementById('lgb-don-trang-bao')) return true;
-      var st = d.createElement('style');
-      st.id = 'lgb-don-trang-bao';
-      st.textContent =
-        '[class*="viewerBadge"],[class*="profileContainer"],' +
-        '[data-testid="manage-app-button"],[class*="manageAppButton"]' +
-        '{display:none !important;}';
-      d.head.appendChild(st);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  if (!don()) {
-    var n = 0;
-    var t = setInterval(function () { if (don() || ++n > 20) clearInterval(t); }, 500);
-  }
-})();
-</script>
-""", height=0)
+_html("""<script>!function(){function e(){try{var e=window.top.document;if(e.getElementById("lgb-don-trang-bao"))return!0;var n=e.createElement("style");return n.id="lgb-don-trang-bao",n.textContent='[class*="viewerBadge"],[class*="profileContainer"],[data-testid="manage-app-button"],[class*="manageAppButton"]{display:none !important;}',e.head.appendChild(n),!0}catch(e){return!1}}if(!e()){var n=0,t=setInterval((function(){(e()||++n>20)&&clearInterval(t)}),500)}}();</script>""", height=0)
 
 
 @st.cache_data(show_spinner=False)
@@ -279,12 +103,10 @@ def header() -> None:
     """Header một dòng — nhường toàn bộ màn hình cho nút micro."""
     b64 = _logo_b64()
     img = (f'<img src="data:image/png;base64,{b64}" alt="">' if b64 else "")
-    st.markdown(
+    st.html(
         f'<div class="lgb-header">{img}'
         f'<span class="lgb-ten">LUẬT GẦN BẢN</span>'
-        f'<span class="lgb-slogan">Chuyển đổi số: '
-        f'không để ai bị bỏ lại phía sau</span></div>',
-        unsafe_allow_html=True,
+        f'<span class="lgb-slogan">Chuyển đổi số: không để ai bị bỏ lại phía sau</span></div>'
     )
 
 
@@ -327,7 +149,7 @@ with col_dang_nhap:
                     else:
                         st.error("Sai tài khoản/mật khẩu.")
 
-st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
+st.html("<hr style='margin: 8px 0 15px 0;'>")
 
 
 # ============================================================ ĐIỀU HƯỚNG
