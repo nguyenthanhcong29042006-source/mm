@@ -42,7 +42,7 @@ st.title("📖 Giới thiệu Dự án & Ý nghĩa")
 u = auth.nguoi_dang_nhap()
 
 # ==============================================================================
-# LOGIC PHÂN QUYỀN ADMIN: Tải file Word giữ nguyên định dạng bằng Mammoth
+# LOGIC PHÂN QUYỀN ADMIN: Tải file Word giữ nguyên định dạng chuẩn tài liệu
 # ==============================================================================
 if u and u.get("vai_tro") == "admin":
     with st.expander("⚙️ BẢNG ĐIỀU KHIỂN ADMIN - CHỈNH SỬA NỘI DUNG", expanded=False):
@@ -63,7 +63,7 @@ if u and u.get("vai_tro") == "admin":
                 st.rerun()
                 
         with tab_file:
-            st.caption("Tải lên file Markdown, Text hoặc Word (.docx). Hệ thống sẽ tự động giữ nguyên chuẩn định dạng và hình ảnh.")
+            st.caption("Tải lên file Markdown, Text hoặc Word (.docx). Hệ thống sẽ chuyển đổi giữ nguyên bố cục và hình ảnh.")
             uploaded_file = st.file_uploader("Chọn file tải lên", type=["md", "txt", "docx"])
             
             if uploaded_file is not None:
@@ -72,9 +72,9 @@ if u and u.get("vai_tro") == "admin":
                 if uploaded_file.name.endswith(".docx"):
                     try:
                         import mammoth
-                        # Chuyển đổi file docx sang HTML, tự động nhúng hình ảnh dưới dạng base64 đúng vị trí
+                        # Chuyển đổi file docx sang HTML chuẩn, nhúng ảnh base64
                         result = mammoth.convert_to_html(uploaded_file)
-                        file_content = result.value  # Chuỗi HTML giữ trọn vẹn style và ảnh
+                        file_content = result.value
                     except ImportError:
                         st.error("Hệ thống chưa cài thư viện `mammoth`. Hãy thêm `mammoth` vào requirements.txt.")
                     except Exception as e:
@@ -86,8 +86,21 @@ if u and u.get("vai_tro") == "admin":
                         file_content = uploaded_file.read().decode("latin-1")
                 
                 if file_content:
-                    st.caption("Xem trước nội dung:")
-                    st.markdown(file_content, unsafe_allow_html=True)
+                    st.caption("Xem trước bố cục tài liệu:")
+                    # Hiển thị bản xem trước trong khung giấy
+                    preview_html = f"""
+                    <div style="background: #ffffff; color: #000000; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: 'Times New Roman', Times, serif; line-height: 1.65; max-height: 400px; overflow-y: auto;">
+                        <style>
+                            img {{ max-width: 100%; height: auto; display: block; margin: 20px auto; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }}
+                            h1, h2, h3, h4 {{ color: #003366; font-family: 'Times New Roman', Times, serif; margin-top: 20px; }}
+                            table {{ border-collapse: collapse; width: 100%; margin: 15px 0; }}
+                            th, td {{ border: 1px solid #d3d3d3; padding: 8px 12px; text-align: left; }}
+                            th {{ background-color: #f5f5f5; }}
+                        </style>
+                        {file_content}
+                    </div>
+                    """
+                    st.markdown(preview_html, unsafe_allow_html=True)
                     
                     if st.button("🚀 Xác nhận cập nhật từ file", type="primary"):
                         st.session_state["intro_content"] = file_content
@@ -98,6 +111,63 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("---")
 
 # ==============================================================================
-# HIỂN THỊ NỘI DUNG CHÍNH (Hỗ trợ hiển thị chuẩn HTML/Markdown và ảnh nhúng)
+# HIỂN THỊ NỘI DUNG CHÍNH (Đóng khung giống như một trang tài liệu Word thực thụ)
 # ==============================================================================
-st.markdown(st.session_state["intro_content"], unsafe_allow_html=True)
+document_html = f"""
+<div style="
+    background: #ffffff;
+    color: #111111;
+    padding: 50px 60px;
+    margin: 10px auto;
+    max-width: 900px;
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    font-family: 'Times New Roman', Times, serif;
+    line-height: 1.7;
+    font-size: 17px;
+">
+    <style>
+        /* Tùy chỉnh CSS để hình ảnh, tiêu đề, bảng hiển thị y hệt văn bản hành chính */
+        img {{
+            max-width: 100% !important;
+            height: auto !important;
+            display: block !important;
+            margin: 25px auto !important;
+            border-radius: 6px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+        }}
+        h1, h2, h3, h4, h5, h6 {{
+            color: #003366 !important;
+            font-family: 'Times New Roman', Times, serif !important;
+            font-weight: bold !important;
+            margin-top: 25px !important;
+            margin-bottom: 12px !important;
+        }}
+        p {{
+            margin-bottom: 15px !important;
+            text-align: justify !important;
+        }}
+        ul, ol {{
+            margin-bottom: 15px !important;
+            padding-left: 30px !important;
+        }}
+        table {{
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }}
+        th, td {{
+            border: 1px solid #cccccc;
+            padding: 10px 14px;
+            text-align: left;
+        }}
+        th {{
+            background-color: #f0f4f8;
+            color: #003366;
+        }}
+    </style>
+    {st.session_state["intro_content"]}
+</div>
+"""
+
+st.markdown(document_html, unsafe_allow_html=True)
