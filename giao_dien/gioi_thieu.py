@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import streamlit as st
 import os
+from pathlib import Path
 from core import auth
 
 # ==============================================================================
@@ -41,32 +42,57 @@ st.title("📖 Giới thiệu Dự án & Ý nghĩa")
 u = auth.nguoi_dang_nhap()
 
 # ==============================================================================
-# LOGIC PHÂN QUYỀN ADMIN: Chỉ tài khoản admin mới nhìn thấy khung chỉnh sửa
+# LOGIC PHÂN QUYỀN ADMIN: Soạn thảo trực tiếp hoặc Tải file lên (.md, .txt, .docx)
 # ==============================================================================
 if u and u.get("vai_tro") == "admin":
     with st.expander("⚙️ BẢNG ĐIỀU KHIỂN ADMIN - CHỈNH SỬA NỘI DUNG", expanded=False):
         st.warning("Bạn đang đăng nhập bằng tài khoản Quản trị viên. Mọi thay đổi sẽ được lưu vĩnh viễn vào hệ thống.")
         
-        # Khung nhập liệu hỗ trợ cú pháp Markdown trực quan
-        updated_content = st.text_area(
-            "Soạn thảo nội dung giới thiệu:", 
-            value=st.session_state["intro_content"], 
-            height=350
-        )
+        tab_soan, tab_file = st.tabs(["✍️ Soạn thảo trực tiếp", "📁 Tải file lên (.md, .txt, .docx)"])
         
-        col_luu, col_huy = st.columns([1, 4])
-        with col_luu:
-            if st.button("💾 Lưu nội dung", type="primary"):
-                # Cập nhật vào session và ghi lưu trực tiếp ra file cứng
+        with tab_soan:
+            updated_content = st.text_area(
+                "Soạn thảo nội dung giới thiệu:", 
+                value=st.session_state["intro_content"], 
+                height=300
+            )
+            if st.button("💾 Lưu nội dung soạn thảo", type="primary"):
                 st.session_state["intro_content"] = updated_content
                 save_intro_content(updated_content)
-                st.success("Đã lưu và cập nhật hệ thống thành công!")
+                st.success("Đã lưu và cập nhật thành công!")
                 st.rerun()
-        with col_huy:
-            if st.button("🔄 Hủy / Tải lại"):
-                # Khôi phục trạng thái từ file gốc
-                st.session_state["intro_content"] = load_intro_content()
-                st.rerun()
+                
+        with tab_file:
+            st.caption("Tải lên file định dạng Markdown, Text hoặc Word (.docx) chứa nội dung mới.")
+            uploaded_file = st.file_uploader("Chọn file tải lên", type=["md", "txt", "docx"])
+            
+            if uploaded_file is not None:
+                file_text = ""
+                # Xử lý tùy thuộc vào định dạng file người dùng tải lên
+                if uploaded_file.name.endswith(".docx"):
+                    try:
+                        import docx
+                        doc = docx.Document(uploaded_file)
+                        file_text = "\n".join([p.text for p in doc.paragraphs])
+                    except ImportError:
+                        st.error("Hệ thống chưa cài thư viện đọc file Word (`python-docx`). Hãy cài bổ sung vào requirements.txt.")
+                    except Exception as e:
+                        st.error(f"Lỗi đọc file Word: {e}")
+                else:
+                    # Xử lý file .md hoặc .txt
+                    try:
+                        file_text = uploaded_file.read().decode("utf-8")
+                    except Exception:
+                        file_text = uploaded_file.read().decode("latin-1")
+                
+                if file_text:
+                    st.text_area("Xem trước nội dung trích xuất từ file:", value=file_text, height=200, disabled=True)
+                    
+                    if st.button("🚀 Xác nhận cập nhật từ file", type="primary"):
+                        st.session_state["intro_content"] = file_text
+                        save_intro_content(file_text)
+                        st.success("Đã cập nhật nội dung từ file lên hệ thống thành công!")
+                        st.rerun()
                 
     st.markdown("---")
 
