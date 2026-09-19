@@ -23,7 +23,7 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & TỐI ƯU CSS NÚT GIỚI THIỆU SANG TRỌNG, TỐI GIẢN, CĂN GIỮA
+# GIAO DIỆN CHUNG & TỐI ƯU CSS CHUYÊN SÂU (Sang trọng, tối giản, căn giữa chuẩn)
 # ==========================================================================
 st.markdown("""
 <style>
@@ -47,35 +47,33 @@ st.markdown("""
       }
   }
 
-  /* ---------- NÚT CHUYỂN TRANG SANG TRỌNG, TỐI GIẢN, CĂN GIỮA TUYỆT ĐỐI ---------- */
+  /* ---------- NÚT ĐIỀU HƯỚNG TỐI GIẢN, SANG TRỌNG, CĂN GIỮA TUYỆT ĐỐI ---------- */
   .element-container:has([data-testid="stPageLink"]) {
       display: flex !important;
       justify-content: center !important;
       align-items: center !important;
       width: 100% !important;
-      margin: 10px 0 15px 0 !important;
+      margin: 10px 0 !important;
   }
   [data-testid="stPageLink"] {
       display: inline-flex !important;
       justify-content: center !important;
       align-items: center !important;
+      gap: 8px !important;
       margin: 0 auto !important;
-      width: fit-content !important;
-      min-width: max-content !important;
-      max-width: 100% !important;
-      background: #ffffff !important;
-      border: 1px solid #e2e8f0 !important;
-      border-radius: 30px !important;         /* Bo tròn dạng viên thuốc (pill) tinh tế, hiện đại */
-      padding: 8px 22px !important;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 10px !important;
+      padding: 8px 20px !important;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
       box-sizing: border-box !important;
       text-decoration: none !important;
   }
   [data-testid="stPageLink"]:hover {
-      background: #f8fafc !important;
-      border-color: #cbd5e1 !important;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+      border-color: #003366 !important;
+      box-shadow: 0 4px 14px rgba(0, 51, 102, 0.08) !important;
       transform: translateY(-1px);
   }
   [data-testid="stPageLink"] span {
