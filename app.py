@@ -23,11 +23,11 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & TỐI ƯU HIỆU NĂNG GIAO DIỆN (Sang trọng, Tối giản, Căn giữa)
+# GIAO DIỆN CHUNG & CSS CHUYÊN SÂU (Đồng bộ khung nút Giới thiệu giống nút Quay lại)
 # ==========================================================================
 st.markdown("""
 <style>
-  /* ---------- ÉP THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG TRÊN MỌI THIẾT BỊ ---------- */
+  /* ---------- ÉP CỐ ĐỊNH THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG NGANG TRÊN MỌI THIẾT BỊ ---------- */
   @media (max-width: 768px) {
       div[data-testid="stHorizontalBlock"] {
           display: flex !important;
@@ -47,32 +47,35 @@ st.markdown("""
       }
   }
 
-  /* ---------- TỐI ƯU NÚT "GIỚI THIỆU DỰ ÁN": CĂN GIỮA TUYỆT ĐỐI, TỐI GIẢN SANG TRỌNG ---------- */
+  /* ---------- ĐỒNG BỘ KHUNG NÚT "GIỚI THIỆU DỰ ÁN" GIỐNG HỆT NÚT "QUAY LẠI" ---------- */
+  
+  /* Căn giữa container chứa nút */
   .element-container:has([data-testid="stPageLink"]) {
       display: flex !important;
       justify-content: center !important;
-      align-items: center !important;
       width: 100% !important;
-      margin: 6px 0 !important;
+      margin: 5px 0 !important;
   }
+  
+  /* Khung hộp bo góc 8px giống hệt nút ở trang giới thiệu */
   [data-testid="stPageLink"] {
-      display: inline-flex !important;
+      align-self: center !important; 
+      margin: 0 auto !important;
+      display: flex !important;
+      flex-direction: row !important;
       justify-content: center !important;
       align-items: center !important;
-      margin: 0 auto !important;
-      width: fit-content !important;
-      min-width: max-content !important;
-      max-width: 100% !important;
-      background-color: #ffffff !important;
+      width: max-content !important;      /* Ép khung ôm vừa khít chữ */
+      background-color: #fcfcfc !important;
       border: 1px solid #e2e8f0 !important;
-      border-radius: 20px !important;             /* Thiết kế dạng viên thuốc bo tròn sang trọng */
-      padding: 7px 22px !important;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03) !important;
-      transition: all 0.2s ease !important;
+      border-radius: 8px !important;      /* Bo góc chuẩn 8px giống nút Quay lại */
+      padding: 6px 14px !important;       /* Padding gọn gàng đồng bộ */
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+      transition: all 0.25s ease-in-out !important;
       text-decoration: none !important;
   }
   [data-testid="stPageLink"]:hover {
-      background-color: #f8fafc !important;
+      background-color: #f1f5f9 !important;
       border-color: #cbd5e1 !important;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
       transform: translateY(-1px) !important;
@@ -80,12 +83,11 @@ st.markdown("""
   [data-testid="stPageLink"] span {
       white-space: nowrap !important;
       overflow: visible !important;
-      text-overflow: unset !important;          /* Triệt tiêu hoàn toàn dấu 3 chấm (...) */
+      text-overflow: clip !important;     /* Chống khuyết chữ, mất chữ trên mobile */
       font-family: 'Times New Roman', Times, serif !important;
       font-size: 15px !important;
       color: #003366 !important;
       font-weight: 600 !important;
-      letter-spacing: 0.2px !important;
   }
 
   /* ---------- phông chữ ---------- */
@@ -337,7 +339,7 @@ if not hasattr(st, "navigation") or not hasattr(st, "Page"):
     )
     st.stop()
 
-# Khai báo danh sách trang trong hệ thống (Tinh chỉnh biểu tượng Material Info tối giản & sang trọng)
+# Khai báo danh sách trang trong hệ thống
 trang = [
     st.Page("giao_dien/cong_dan.py", title="Hỏi đáp thủ tục",
              icon=":material/record_voice_over:", default=True),
