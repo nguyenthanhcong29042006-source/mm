@@ -23,30 +23,26 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG
-#
-# Nguyên tắc: màn hình của bà con chỉ nên có MỘT thứ nổi bật — nút micro.
-# Mọi thứ Streamlit tự thêm vào (thanh Deploy, menu ⋮, huy hiệu GitHub, đồng
-# hồ chạy ở góc) đều bị ẩn, vì bà con không hiểu chúng là gì và rất dễ bấm
-# nhầm.
+# GIAO DIỆN CHUNG & TỐI ƯU RESPONSIVE TRÊN MOBILE
 # ==========================================================================
 st.markdown("""
 <style>
-  /* ---------- ÉP THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG TRÊN MỌI THIẾT BỊ ---------- */
+  /* ---------- ÉP CỐ ĐỊNH THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG NGANG (KHÔNG BAO GIỜ RỚT DÒNG) ---------- */
   div[data-testid="stHorizontalBlock"]:first-of-type {
       display: flex !important;
       flex-direction: row !important;
       flex-wrap: nowrap !important;
       align-items: center !important;
+      gap: 8px !important;
+      width: 100% !important;
   }
   div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"] {
+      min-width: 0 !important;
+      flex: 1 1 auto !important;
+  }
+  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"]:last-child {
+      flex: 0 0 auto !important;
       width: auto !important;
-  }
-  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"]:first-child {
-      flex-grow: 1 !important;
-  }
-  div[data-testid="stColumn"]:last-child {
-      flex-shrink: 0 !important;
   }
 
   /* ---------- phông chữ ---------- */
@@ -83,30 +79,38 @@ st.markdown("""
   /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
   .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; }
 
-  /* Component HTML: bỏ viền. Riêng cái cao 0 (đoạn JS dọn trang bao) thì
-     không được chiếm chỗ. KHÔNG ẩn tất cả — nút loa cũng là component. */
+  /* Component HTML: bỏ viền */
   iframe[title="streamlit.components.v1.html"] { border: 0 !important; }
   iframe[title="streamlit.components.v1.html"][height="0"] {
       height: 0 !important; display: block !important;
   }
 
-  /* ---------- header dự án: gom về MỘT dòng ---------- */
+  /* ---------- header dự án: gom về MỘT dòng, chống tràn chữ ---------- */
   .lgb-header {
-      display: inline-flex; align-items: center; gap: 8px;
-      margin: 0 !important; padding: 0 !important;
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px;
+      margin: 0 !important; 
+      padding: 0 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
   }
-  .lgb-header img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+  .lgb-header img { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
   .lgb-ten {
-      color: #003366; font-size: 17px; font-weight: bold;
+      color: #003366; font-size: 16px; font-weight: bold;
       letter-spacing: .2px; white-space: nowrap;
   }
   .lgb-slogan {
-      color: #666; font-size: 11.5px; font-style: italic;
-      border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px;
+      color: #666; font-size: 11px; font-style: italic;
+      border-left: 1px solid #ccc; padding-left: 6px; margin-left: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
   }
   @media (max-width: 640px) {
-      .lgb-slogan { display: none; }          /* điện thoại: bỏ slogan cho gọn */
-      .lgb-ten    { font-size: 15px; }
+      .lgb-slogan { display: none; }          /* điện thoại: ẩn slogan để tiết kiệm diện tích */
+      .lgb-ten    { font-size: 14px; }
   }
 
   /* ---------- khu ghi âm: nút micro tròn, to ---------- */
