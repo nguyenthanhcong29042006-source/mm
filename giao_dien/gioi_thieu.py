@@ -126,14 +126,14 @@ if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
 # ==============================================================================
-# HEADER SẠCH SẼ, GỌN GÀNG (Đã loại bỏ hoàn toàn các đường kẻ ngang thừa)
+# HEADER HOÀN CHỈNH (Đã bỏ hoàn toàn khung viền của chữ APAG)
 # ==============================================================================
 col_logo_title, col_btn_login = st.columns([6, 1], vertical_alignment="center")
 
 with col_logo_title:
     st.markdown("""
     <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 4px 0;">
-        <span style="font-weight: 900; color: #CC0000; font-size: 15px; background: #fff; padding: 2px 6px; border: 1px solid #ddd; border-radius: 4px;">APAG</span>
+        <span style="font-weight: 900; color: #CC0000; font-size: 18px; font-family: sans-serif;">APAG</span>
         <span style="font-weight: bold; font-size: 21px; color: #002244; font-family: 'Times New Roman', Times, serif; letter-spacing: 0.3px;">LUẬT GẦN BẢN</span>
         <span style="color: #cccccc; font-size: 18px; font-weight: 300;">|</span>
         <span style="font-size: 14px; color: #555555; font-style: italic; font-family: 'Times New Roman', Times, serif;">Chuyển đổi số: không để ai bị bỏ lại phía sau</span>
