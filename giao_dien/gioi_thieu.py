@@ -7,6 +7,29 @@ from pathlib import Path
 from core import auth
 
 # ==============================================================================
+# TỐI ƯU HÓA KHOẢNG TRẮNG & RESPONSIVE CHUẨN MỰC (Cả PC & Mobile)
+# ==============================================================================
+st.markdown("""
+<style>
+    /* Thu hẹp khoảng đệm container chính để giao diện áp sát lề gọn gàng */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 3rem !important;
+        max-width: 900px !important;
+    }
+    
+    /* Tối ưu riêng cho màn hình điện thoại di động */
+    @media screen and (max-width: 640px) {
+        .block-container {
+            padding-top: 0.5rem !important;
+            padding-left: 0.8rem !important;
+            padding-right: 0.8rem !important;
+        }
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# ==============================================================================
 # CƠ CHẾ LƯU TRỮ FILE CỨNG AN TOÀN (Mã hóa UTF-8 chống lỗi font)
 # ==============================================================================
 DATA_FILE = "data/gioi_thieu.md"
@@ -22,7 +45,6 @@ def load_intro_content():
     except Exception:
         pass
     
-    # Nội dung mặc định chuẩn tiếng Việt nếu file trống hoặc lỗi
     return """<h2 style="text-align: center; color: #003366;">GIỚI THIỆU DỰ ÁN</h2>
 <h2 style="text-align: center; color: #003366;">LUẬT GẦN BẢN</h2>
 <p style="text-align: center;"><b>Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số</b></p>
@@ -53,7 +75,6 @@ def docx_to_exact_html(docx_file) -> str:
         html_parts = []
         
         for p in doc.paragraphs:
-            # Xác định căn lề chuẩn
             align_style = "text-align: left;"
             if p.alignment == WD_ALIGN_PARAGRAPH.CENTER:
                 align_style = "text-align: center;"
@@ -66,7 +87,6 @@ def docx_to_exact_html(docx_file) -> str:
             for run in p.runs:
                 text = run.text
                 if not text:
-                    # Trích xuất hình ảnh nhúng bên trong đoạn văn bản
                     try:
                         drawings = run._r.xpath('.//a:blip')
                         for blip in drawings:
@@ -80,9 +100,7 @@ def docx_to_exact_html(docx_file) -> str:
                         pass
                     continue
                 
-                # Chống lỗi ký tự đặc biệt (XSS/HTML Escaping an toàn tuyệt đối)
                 safe_text = html.escape(text)
-                
                 style_runs = []
                 if run.bold:
                     safe_text = f"<b>{safe_text}</b>"
@@ -108,17 +126,16 @@ def docx_to_exact_html(docx_file) -> str:
                 elif "heading 2" in style_name:
                     tag = "h3"
                 
-                html_parts.append(f'<{tag} style="{align_style} margin-bottom: 12px;">{full_p_text}</{tag}>')
+                html_parts.append(f'<{tag} style="{align_style} margin-bottom: 10px;">{full_p_text}</{tag}>')
         
-        # Xử lý bảng biểu (tables) chuẩn xác
         for table in doc.tables:
-            table_html = ['<table style="border-collapse: collapse; width: 100%; margin: 20px 0;">']
+            table_html = ['<div style="overflow-x: auto; margin: 15px 0;"><table style="border-collapse: collapse; width: 100%;">']
             for row in table.rows:
                 table_html.append('<tr>')
                 for cell in row.cells:
-                    table_html.append(f'<td style="border: 1px solid #cccccc; padding: 10px 14px; text-align: left;">{html.escape(cell.text)}</td>')
+                    table_html.append(f'<td style="border: 1px solid #cccccc; padding: 8px 12px; text-align: left;">{html.escape(cell.text)}</td>')
                 table_html.append('</tr>')
-            table_html.append('</table>')
+            table_html.append('</table></div>')
             html_parts.append("".join(table_html))
             
         return "\n".join(html_parts)
@@ -126,23 +143,20 @@ def docx_to_exact_html(docx_file) -> str:
         st.error(f"Không thể đọc file Word: {e}")
         return ""
 
-# Nạp dữ liệu vào bộ nhớ tạm an toàn
 if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
-# Nút điều hướng quay lại trang chủ Hỏi đáp
-if st.button("⬅️ Quay lại trang Hỏi đáp chính"):
-    st.switch_page("giao_dien/cong_dan.py")
+# ==============================================================================
+# KHU VỰC ĐIỀU HƯỚNG & TIÊU ĐỀ (Dùng page_link chống vỡ bố cục trên Mobile)
+# ==============================================================================
+st.page_link("giao_dien/cong_dan.py", label="Quay lại trang Hỏi đáp chính", icon="⬅️")
 
-st.markdown("---")
+st.markdown("<hr style='margin: 8px 0 12px 0;'>", unsafe_allow_html=True)
 st.title("📖 Giới thiệu Dự án & Ý nghĩa")
 
-# Lấy thông tin tài khoản đang đăng nhập để kiểm tra phân quyền
+# Lấy thông tin tài khoản đăng nhập để kiểm tra phân quyền quản trị
 u = auth.nguoi_dang_nhap()
 
-# ==============================================================================
-# LOGIC PHÂN QUYỀN ADMIN: Quản trị nội dung an toàn, mượt mà
-# ==============================================================================
 if u and u.get("vai_tro") == "admin":
     with st.expander("⚙️ BẢNG ĐIỀU KHIỂN ADMIN - CHỈNH SỬA NỘI DUNG", expanded=False):
         st.warning("Bạn đang đăng nhập bằng tài khoản Quản trị viên. Mọi thay đổi sẽ được lưu vĩnh viễn vào hệ thống.")
@@ -167,7 +181,6 @@ if u and u.get("vai_tro") == "admin":
             
             if uploaded_file is not None:
                 file_content = ""
-                
                 if uploaded_file.name.endswith(".docx"):
                     file_content = docx_to_exact_html(uploaded_file)
                 else:
@@ -182,43 +195,44 @@ if u and u.get("vai_tro") == "admin":
                 if file_content:
                     st.caption("Xem trước bố cục tài liệu:")
                     preview_html = f"""
-                    <div style="background: #ffffff; color: #000000; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: 'Times New Roman', Times, serif; line-height: 1.7; max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+                    <div style="background: #ffffff; color: #000000; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: 'Times New Roman', Times, serif; line-height: 1.7; max-height: 350px; overflow-y: auto; margin-bottom: 15px; box-sizing: border-box;">
                         {file_content}
                     </div>
                     """
                     st.markdown(preview_html, unsafe_allow_html=True)
                     
-                    st.markdown("<br>", unsafe_allow_html=True)
                     if st.button("🚀 Xác nhận cập nhật từ file", type="primary", use_container_width=True):
                         if save_intro_content(file_content):
                             st.session_state["intro_content"] = file_content
                             st.success("Đã cập nhật nội dung chuẩn định dạng từ file thành công!")
                             st.rerun()
                 
-    st.markdown("---")
+    st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
-# HIỂN THỊ NỘI DUNG CHÍNH (Giao diện trang tài liệu chuẩn mực, mượt mà)
+# HIỂN THỊ NỘI DUNG CHÍNH (Co giãn mượt mà, chống vỡ giao diện trên Mobile)
 # ==============================================================================
 document_html = f"""
 <div style="
     background: #ffffff;
     color: #111111;
-    padding: 50px 60px;
-    margin: 10px auto;
+    padding: clamp(15px, 3.5vw, 45px);
+    margin: 5px auto;
     max-width: 900px;
+    width: 100%;
     border-radius: 6px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     font-family: 'Times New Roman', Times, serif;
     line-height: 1.7;
-    font-size: 17px;
+    font-size: clamp(15px, 1.8vw, 17px);
+    box-sizing: border-box;
 ">
     <style>
         img {{
             max-width: 100% !important;
             height: auto !important;
             display: block !important;
-            margin: 25px auto !important;
+            margin: 20px auto !important;
             border-radius: 6px !important;
             box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
         }}
@@ -226,20 +240,26 @@ document_html = f"""
             color: #003366 !important;
             font-family: 'Times New Roman', Times, serif !important;
             font-weight: bold !important;
-            margin-top: 25px !important;
-            margin-bottom: 12px !important;
+            margin-top: 20px !important;
+            margin-bottom: 10px !important;
+            word-wrap: break-word;
         }}
         p {{
-            margin-bottom: 15px !important;
+            margin-bottom: 12px !important;
+            word-wrap: break-word;
         }}
+        /* Ép bảng biểu tự động sinh thanh cuộn ngang khi xem trên màn hình nhỏ */
         table {{
             border-collapse: collapse;
             width: 100%;
-            margin: 20px 0;
+            margin: 15px 0;
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
         }}
         th, td {{
             border: 1px solid #cccccc;
-            padding: 10px 14px;
+            padding: 8px 12px;
             text-align: left;
         }}
     </style>
