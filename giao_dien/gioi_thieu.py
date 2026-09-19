@@ -6,30 +6,12 @@ import html
 from pathlib import Path
 from core import auth
 
-# ==============================================================================
-# TỐI ƯU HÓA KHOẢNG TRẮNG & GIAO DIỆN RESPONSIVE (Cả PC & Mobile)
-# ==============================================================================
+# Tối ưu hóa khoảng trắng đầu trang cho cả PC và Mobile
 st.markdown("""
 <style>
-    /* Ẩn thanh header mặc định của Streamlit gây khoảng trắng thừa phía trên */
-    .stApp > header {
-        display: none !important;
-    }
-    
-    /* Thu hẹp khoảng đệm của container chính, loại bỏ khoảng trống lớn */
     .block-container {
         padding-top: 1rem !important;
         padding-bottom: 2rem !important;
-        max-width: 100% !important;
-    }
-    
-    /* Tự động tối ưu riêng cho màn hình điện thoại di động */
-    @media screen and (max-width: 768px) {
-        .block-container {
-            padding-top: 0.5rem !important;
-            padding-left: 0.5rem !important;
-            padding-right: 0.5rem !important;
-        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -155,7 +137,7 @@ if "intro_content" not in st.session_state:
 if st.button("⬅️ Quay lại trang Hỏi đáp chính"):
     st.switch_page("giao_dien/cong_dan.py")
 
-st.markdown("<hr style='margin: 8px 0;'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 st.title("📖 Giới thiệu Dự án & Ý nghĩa")
 
 u = auth.nguoi_dang_nhap()
@@ -211,7 +193,7 @@ if u and u.get("vai_tro") == "admin":
                             st.success("Đã cập nhật nội dung chuẩn định dạng từ file thành công!")
                             st.rerun()
                 
-    st.markdown("<hr style='margin: 8px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
 # HIỂN THỊ NỘI DUNG CHÍNH (Responsive chuẩn mực hoàn hảo cho cả PC và Mobile)
