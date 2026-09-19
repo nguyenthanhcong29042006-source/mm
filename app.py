@@ -23,7 +23,7 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & TỐI ƯU CSS CHUYÊN SÂU (Căn giữa tuyệt đối, chống lệch mobile)
+# GIAO DIỆN CHUNG & TỐI ƯU CSS CHUYÊN SÂU (Căn giữa hoàn hảo trên PC & Mobile)
 # ==========================================================================
 st.markdown("""
 <style>
@@ -47,14 +47,17 @@ st.markdown("""
       }
   }
 
-  /* ---------- CĂN GIỮA TUYỆT ĐỐI NÚT ST.PAGE_LINK TRÊN MỌI THIẾT BỊ (PC & MOBILE) ---------- */
+  /* ---------- CĂN GIỮA TUYỆT ĐỐI NÚT ST.PAGE_LINK BẰNG FLEXBOX (Chuẩn mọi thiết bị) ---------- */
+  .element-container:has([data-testid="stPageLink"]) {
+      display: flex !important;
+      justify-content: center !important;
+      width: 100% !important;
+  }
   [data-testid="stPageLink"] {
-      position: relative !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
       display: inline-flex !important;
       justify-content: center !important;
       align-items: center !important;
+      margin: 0 auto !important;
       background-color: #fcfcfc !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
@@ -63,6 +66,9 @@ st.markdown("""
       transition: all 0.25s ease-in-out !important;
       box-sizing: border-box !important;
       text-decoration: none !important;
+      position: static !important;
+      transform: none !important;
+      left: auto !important;
   }
   [data-testid="stPageLink"]:hover {
       background-color: #f1f5f9 !important;
