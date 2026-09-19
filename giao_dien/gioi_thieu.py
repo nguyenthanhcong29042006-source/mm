@@ -28,10 +28,33 @@ st.markdown("""
             padding-right: 0.8rem !important;
         }
     }
+
+    /* Thiết kế lại nút st.page_link thành dạng minimalist sang trọng, gọn gàng */
+    [data-testid="stPageLink"] {
+        background-color: #fcfcfc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        padding: 6px 14px !important;
+        transition: all 0.25s ease-in-out !important;
+        width: fit-content !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+    }
+    [data-testid="stPageLink"]:hover {
+        background-color: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
+        transform: translateY(-1px);
+    }
+    [data-testid="stPageLink"] span {
+        font-family: 'Times New Roman', Times, serif !important;
+        font-size: 15px !important;
+        color: #003366 !important;
+        font-weight: 600 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Nút quay lại trang Hỏi đáp chính gọn gàng
+# Nút quay lại trang Hỏi đáp chính được tinh chỉnh gọn gàng, cao cấp
 st.page_link("giao_dien/cong_dan.py", label="Quay lại trang Hỏi đáp chính", icon="⬅️")
 st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
 
