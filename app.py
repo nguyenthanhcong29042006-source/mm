@@ -23,7 +23,7 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & TỐI ƯU CSS CHUYÊN SÂU (Căn giữa hoàn hảo trên PC & Mobile)
+# GIAO DIỆN CHUNG & TỐI ƯU CSS TỰ ĐỘNG CĂN GIỮA THÍCH ỨNG MỌI THIẾT BỊ
 # ==========================================================================
 st.markdown("""
 <style>
@@ -47,11 +47,13 @@ st.markdown("""
       }
   }
 
-  /* ---------- CĂN GIỮA TUYỆT ĐỐI NÚT ST.PAGE_LINK BẰNG FLEXBOX (Chuẩn mọi thiết bị) ---------- */
+  /* ---------- TỰ ĐỘNG CĂN GIỮA TUYỆT ĐỐI NÚT ST.PAGE_LINK CHO TẤT CẢ THIẾT BỊ (PC & MOBILE) ---------- */
   .element-container:has([data-testid="stPageLink"]) {
       display: flex !important;
       justify-content: center !important;
+      align-items: center !important;
       width: 100% !important;
+      margin: 8px 0 !important;
   }
   [data-testid="stPageLink"] {
       display: inline-flex !important;
@@ -66,9 +68,6 @@ st.markdown("""
       transition: all 0.25s ease-in-out !important;
       box-sizing: border-box !important;
       text-decoration: none !important;
-      position: static !important;
-      transform: none !important;
-      left: auto !important;
   }
   [data-testid="stPageLink"]:hover {
       background-color: #f1f5f9 !important;
@@ -78,7 +77,7 @@ st.markdown("""
   [data-testid="stPageLink"] span {
       white-space: nowrap !important;
       overflow: visible !important;
-      text-overflow: unset !important;      /* Triệt tiêu hoàn toàn dấu chấm lửng (...) */
+      text-overflow: unset !important;      /* Triệt tiêu hoàn toàn hiện tượng dấu chấm lửng (...) */
       font-family: 'Times New Roman', Times, serif !important;
       font-size: 15px !important;
       color: #003366 !important;
