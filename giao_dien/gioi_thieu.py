@@ -6,36 +6,120 @@ import html
 from pathlib import Path
 from core import auth
 
+ROOT = Path(__file__).resolve().parent.parent
+
 # ==============================================================================
-# TỐI ƯU HÓA KHOẢNG TRẮNG & RESPONSIVE CHUẨN MỰC (Cả PC & Mobile)
+# GIAO DIỆN CHUNG & CSS ĐỒNG BỘ VỚI APP.PY
 # ==============================================================================
 st.markdown("""
 <style>
-    /* Thu hẹp khoảng đệm container chính để giao diện áp sát lề gọn gàng */
-    .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 3rem !important;
-        max-width: 900px !important;
+    /* Phông chữ chung */
+    .stApp, p, h1,h2,h3,h4,h5,h6, label, button, input, .stMarkdown, .stText, .stTextArea
+        { font-family: 'Times New Roman', Times, serif !important; }
+
+    /* Ẩn thanh công cụ mặc định */
+    [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"],
+    [data-testid="manage-app-button"], .stAppDeployButton, #MainMenu, footer,
+    [class*="viewerBadge"], [class*="profileContainer"] { display: none !important; }
+
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        height: 0 !important;
+        min-height: 0 !important;
     }
     
-    /* Tối ưu riêng cho màn hình điện thoại di động */
-    @media screen and (max-width: 640px) {
-        .block-container {
-            padding-top: 0.5rem !important;
-            padding-left: 0.8rem !important;
-            padding-right: 0.8rem !important;
-        }
+    [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] {
+        display: none !important;
+    }
+
+    .block-container { 
+        padding-top: 1.2rem !important; 
+        padding-bottom: 3rem !important; 
+        max-width: 900px !important; 
+    }
+
+    /* ---------- Header dự án: logo, tên, slogan sát gọn một dòng ---------- */
+    .lgb-header {
+        display: flex; align-items: center; gap: 8px;
+        padding-bottom: 4px; 
+    }
+    .lgb-header img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+    .lgb-ten {
+        color: #003366; font-size: 17px; font-weight: bold;
+        letter-spacing: .2px; white-space: nowrap;
+    }
+    .lgb-slogan {
+        color: #666; font-size: 11.5px; font-style: italic;
+        border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px;
+    }
+    @media (max-width: 640px) {
+        .lgb-slogan { display: none; }          /* Điện thoại nhỏ ẩn slogan cho thoáng */
+        .lgb-ten    { font-size: 15px; }
     }
 </style>
 """, unsafe_allow_html=True)
 
+@st.cache_data(show_spinner=False)
+def _logo_b64() -> str:
+    p = ROOT / "logo_hoc_vien.png"
+    return base64.b64encode(p.read_bytes()).decode() if p.exists() else ""
+
 # ==============================================================================
-# CƠ CHẾ LƯU TRỮ FILE CỨNG AN TOÀN (Mã hóa UTF-8 chống lỗi font)
+# HEADER ĐỒNG BỘ (Tiêu đề bên trái, nút chìa khóa/user bên phải)
 # ==============================================================================
-DATA_FILE = "data/gioi_thieu.md"
+auth.khoi_tao_mac_dinh()
+
+col_tieu_de, col_dang_nhap = st.columns([5.2, 0.8], vertical_alignment="center")
+
+with col_tieu_de:
+    b64 = _logo_b64()
+    img = (f'<img src="data:image/png;base64,{b64}" alt="">' if b64 else "")
+    st.markdown(
+        f'<div class="lgb-header">{img}'
+        f'<span class="lgb-ten">LUẬT GẦN BẢN</span>'
+        f'<span class="lgb-slogan">Chuyển đổi số: '
+        f'không để ai bị bỏ lại phía sau</span></div>',
+        unsafe_allow_html=True,
+    )
+
+with col_dang_nhap:
+    u = auth.nguoi_dang_nhap()
+    if u:
+        with st.popover("👤", use_container_width=True, help=f"Đang đăng nhập: {u.get('ten_dang_nhap')}"):
+            st.markdown(f"**{u.get('mo_ta') or u['ten_dang_nhap']}**")
+            st.caption(f"{'Quản trị viên' if u['vai_tro'] == 'admin' else 'Cán bộ'}")
+            if u.get("phai_doi_mk"):
+                st.warning("Cần đổi mật khẩu.", icon="🔑")
+            if st.button("Đăng xuất", use_container_width=True, key="btn_dx_popover_gt"):
+                del st.session_state["nguoi_dung"]
+                st.rerun()
+    else:
+        with st.popover("🔑", use_container_width=True, help="Đăng nhập dành cho cán bộ"):
+            st.markdown("##### 🔐 Đăng nhập cán bộ")
+            with st.form("form_dn_popover_gt", clear_on_submit=False):
+                ten = st.text_input("Tên đăng nhập", placeholder="Nhập tài khoản...")
+                mk = st.text_input("Mật khẩu", type="password", placeholder="Nhập mật khẩu...")
+                if st.form_submit_button("Đăng nhập", type="primary", use_container_width=True):
+                    nd = auth.kiem_tra_dang_nhap(ten, mk)
+                    if nd:
+                        st.session_state["nguoi_dung"] = nd
+                        st.success("Thành công!")
+                        st.rerun()
+                    else:
+                        st.error("Sai tài khoản/mật khẩu.")
+
+st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
+
+# Nút quay lại trang Hỏi đáp chính gọn gàng
+st.page_link("giao_dien/cong_dan.py", label="Quay lại trang Hỏi đáp chính", icon="⬅️")
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ==============================================================================
+# CƠ CHẾ LƯU TRỮ FILE CỨNG & QUẢN TRỊ NỘI DUNG GIỚI THIỆU
+# ==============================================================================
+DATA_FILE = ROOT / "data/gioi_thieu.md"
 
 def load_intro_content():
-    """Đọc nội dung giới thiệu từ file cứng với chuẩn UTF-8, có dự phòng nội dung mặc định."""
     try:
         if os.path.exists(DATA_FILE):
             with open(DATA_FILE, "r", encoding="utf-8") as f:
@@ -55,7 +139,6 @@ def load_intro_content():
 """
 
 def save_intro_content(content):
-    """Ghi đè nội dung mới ra file cứng với mã hóa UTF-8 vĩnh viễn."""
     try:
         os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
         with open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -66,7 +149,6 @@ def save_intro_content(content):
         return False
 
 def docx_to_exact_html(docx_file) -> str:
-    """Bộ phân tích file Word (.docx) chuyên sâu: giữ nguyên căn lề, màu sắc, định dạng và hình ảnh."""
     try:
         import docx
         from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -146,17 +228,8 @@ def docx_to_exact_html(docx_file) -> str:
 if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
-# ==============================================================================
-# KHU VỰC ĐIỀU HƯỚNG & TIÊU ĐỀ (Dùng page_link chống vỡ bố cục trên Mobile)
-# ==============================================================================
-st.page_link("giao_dien/cong_dan.py", label="Quay lại trang Hỏi đáp chính", icon="⬅️")
-
-st.markdown("<hr style='margin: 8px 0 12px 0;'>", unsafe_allow_html=True)
-st.title("📖 Giới thiệu Dự án & Ý nghĩa")
-
-# Lấy thông tin tài khoản đăng nhập để kiểm tra phân quyền quản trị
+# Phân quyền Admin chỉnh sửa nội dung
 u = auth.nguoi_dang_nhap()
-
 if u and u.get("vai_tro") == "admin":
     with st.expander("⚙️ BẢNG ĐIỀU KHIỂN ADMIN - CHỈNH SỬA NỘI DUNG", expanded=False):
         st.warning("Bạn đang đăng nhập bằng tài khoản Quản trị viên. Mọi thay đổi sẽ được lưu vĩnh viễn vào hệ thống.")
@@ -210,7 +283,7 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
-# HIỂN THỊ NỘI DUNG CHÍNH (Co giãn mượt mà, chống vỡ giao diện trên Mobile)
+# HIỂN THỊ NỘI DUNG CHÍNH (Responsive mượt mà trên cả PC và Mobile)
 # ==============================================================================
 document_html = f"""
 <div style="
@@ -248,7 +321,6 @@ document_html = f"""
             margin-bottom: 12px !important;
             word-wrap: break-word;
         }}
-        /* Ép bảng biểu tự động sinh thanh cuộn ngang khi xem trên màn hình nhỏ */
         table {{
             border-collapse: collapse;
             width: 100%;
