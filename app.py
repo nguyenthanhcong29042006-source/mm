@@ -38,33 +38,38 @@ st.markdown("""
       flex-direction: row !important;
       flex-wrap: nowrap !important;
       align-items: center !important;
-      gap: 8px !important;
-      width: 100% !important;
   }
   div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"] {
-      min-width: 0 !important;
-      flex: 1 1 auto !important;
-  }
-  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"]:last-child {
-      flex: 0 0 auto !important;
       width: auto !important;
   }
+  div[data-testid="stHorizontalBlock"]:first-of-type > div[data-testid="stColumn"]:first-child {
+      flex-grow: 1 !important;
+  }
+  div[data-testid="stColumn"]:last-child {
+      flex-shrink: 0 !important;
+  }
 
-  /* ---------- KHẮC PHỤC TRIỆT ĐỂ LỖI CẮT CHỮ ST.PAGE_LINK TRÊN MOBILE ---------- */
+  /* ---------- TỐI ƯU NÚT ST.PAGE_LINK TRÊN MOBILE (Không bị cắt chữ, căn giữa gọn gàng) ---------- */
   [data-testid="stPageLink"] {
       width: 100% !important;
       max-width: 100% !important;
-      padding: 8px 14px !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
       background-color: #fcfcfc !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
+      padding: 8px 14px !important;
+      margin: 5px 0 !important;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
-      box-sizing: border-box !important;
+      transition: all 0.25s ease-in-out !important;
   }
-  [data-testid="stPageLink"] div {
-      overflow: visible !important;
-      text-overflow: unset !important;
-      white-space: normal !important;
+  [data-testid="stPageLink"]:hover {
+      background-color: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
   }
   [data-testid="stPageLink"] span {
       white-space: normal !important;
@@ -121,9 +126,6 @@ st.markdown("""
   .lgb-header {
       display: inline-flex; align-items: center; gap: 8px;
       margin: 0 !important; padding: 0 !important;
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
   }
   .lgb-header img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
   .lgb-ten {
@@ -133,9 +135,6 @@ st.markdown("""
   .lgb-slogan {
       color: #666; font-size: 11.5px; font-style: italic;
       border-left: 1px solid #ccc; padding-left: 8px; margin-left: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
   }
   @media (max-width: 640px) {
       .lgb-slogan { display: none; }          /* điện thoại: bỏ slogan cho gọn */
