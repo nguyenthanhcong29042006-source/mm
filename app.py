@@ -23,7 +23,7 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & TỐI ƯU CSS CHUYÊN SÂU (Đảm bảo cân đối, không khuyết chữ)
+# GIAO DIỆN CHUNG & TỐI ƯU CSS CĂN GIỮA TUYỆT ĐỐI CHO CẢ PC VÀ MOBILE
 # ==========================================================================
 st.markdown("""
 <style>
@@ -47,15 +47,20 @@ st.markdown("""
       }
   }
 
-  /* ---------- TỐI ƯU TUYỆT ĐỐI NÚT ST.PAGE_LINK (Căn giữa, không khuyết chữ, không tràn viền) ---------- */
-  [data-testid="stPageLink"] {
+  /* ---------- CĂN GIỮA TUYỆT ĐỐI KHUNG CHỨA VÀ NÚT ST.PAGE_LINK ---------- */
+  div:has(> [data-testid="stPageLink"]) {
       display: flex !important;
       justify-content: center !important;
+      width: 100% !important;
+      margin: 0 auto !important;
+  }
+  [data-testid="stPageLink"] {
+      display: inline-flex !important;
+      justify-content: center !important;
       align-items: center !important;
-      margin: 0 auto !important;             /* Căn giữa tuyệt đối trên mọi màn hình */
+      margin: 0 auto !important;
       width: fit-content !important;
-      min-width: 200px !important;           /* Đảm bảo bề rộng đủ chứa trọn vẹn văn bản */
-      max-width: 100% !important;
+      min-width: 200px !important;
       background-color: #fcfcfc !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 8px !important;
@@ -72,7 +77,7 @@ st.markdown("""
   [data-testid="stPageLink"] span {
       white-space: nowrap !important;
       overflow: visible !important;
-      text-overflow: unset !important;      /* Triệt tiêu hoàn toàn hiện tượng dấu chấm lửng (...) */
+      text-overflow: unset !important;
       font-family: 'Times New Roman', Times, serif !important;
       font-size: 15px !important;
       color: #003366 !important;
@@ -113,8 +118,7 @@ st.markdown("""
   /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
   .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; max-width: 900px !important; }
 
-  /* Component HTML: bỏ viền. Riêng cái cao 0 (đoạn JS dọn trang bao) thì
-     không được chiếm chỗ. KHÔNG ẩn tất cả — nút loa cũng là component. */
+  /* Component HTML: bỏ viền */
   iframe[title="streamlit.components.v1.html"] { border: 0 !important; }
   iframe[title="streamlit.components.v1.html"][height="0"] {
       height: 0 !important; display: block !important;
