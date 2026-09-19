@@ -110,7 +110,7 @@ def docx_to_exact_html(docx_file) -> str:
                 
                 html_parts.append(f'<{tag} style="{align_style} margin-bottom: 12px;">{full_p_text}</{tag}>')
         
-        # Xử lý bảng biểu (tables) chuẩn xác
+        # Xử lý bảng biểu (tables) chuẩn xác với cuộn ngang trên mobile
         for table in doc.tables:
             table_html = ['<div style="overflow-x: auto; margin: 20px 0;"><table style="border-collapse: collapse; width: 100%;">']
             for row in table.rows:
@@ -198,7 +198,7 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("---")
 
 # ==============================================================================
-# HIỂN THỊ NỘI DUNG CHÍNH (Responsive hoàn hảo cho máy tính và điện thoại)
+# HIỂN THỊ NỘI DUNG CHÍNH (Responsive chuẩn mực hoàn hảo cho cả PC và Mobile)
 # ==============================================================================
 document_html = f"""
 <div style="
