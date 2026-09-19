@@ -23,11 +23,11 @@ st.set_page_config(page_title="Luật Gần Bản", page_icon="⚖️",
                    layout="centered", initial_sidebar_state="collapsed")
 
 # ==========================================================================
-# GIAO DIỆN CHUNG & TỐI ƯU CSS CHUYÊN SÂU (Sang trọng, tối giản, căn giữa chuẩn)
+# GIAO DIỆN CHUNG & CSS CHUYÊN SÂU (Sang trọng, tối giản, căn giữa hoàn hảo)
 # ==========================================================================
 st.markdown("""
 <style>
-  /* ---------- ÉP THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG TRÊN MỌI THIẾT BỊ ---------- */
+  /* ---------- ÉP CỐ ĐỊNH THANH TIÊU ĐỀ LUÔN NẰM TRÊN MỘT HÀNG NGANG TRÊN MỌI THIẾT BỊ ---------- */
   @media (max-width: 768px) {
       div[data-testid="stHorizontalBlock"] {
           display: flex !important;
@@ -47,44 +47,50 @@ st.markdown("""
       }
   }
 
-  /* ---------- NÚT ĐIỀU HƯỚNG TỐI GIẢN, SANG TRỌNG, CĂN GIỮA TUYỆT ĐỐI ---------- */
+  /* ---------- TỐI ƯU NÚT "GIỚI THIỆU DỰ ÁN": SANG TRỌNG, TỐI GIẢN & CĂN GIỮA TUYỆT ĐỐI ---------- */
+  
+  /* Hỗ trợ căn giữa cho các trình duyệt mới */
   .element-container:has([data-testid="stPageLink"]) {
       display: flex !important;
       justify-content: center !important;
-      align-items: center !important;
       width: 100% !important;
-      margin: 10px 0 !important;
+      margin: 5px 0 !important;
   }
+  
+  /* Thiết kế nút dạng viên thuốc (Pill shape) hiện đại, không bao giờ khuyết chữ */
   [data-testid="stPageLink"] {
-      display: inline-flex !important;
+      align-self: center !important; /* Khóa chết ở giữa cho cả các máy iPhone đời cũ */
+      margin: 0 auto !important;
+      display: flex !important;
+      flex-direction: row !important;
       justify-content: center !important;
       align-items: center !important;
-      gap: 8px !important;
-      margin: 0 auto !important;
-      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
-      border: 1px solid #cbd5e1 !important;
-      border-radius: 10px !important;
-      padding: 8px 20px !important;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      box-sizing: border-box !important;
+      width: max-content !important; /* Ép khung ôm vừa khít toàn bộ chữ */
+      min-width: 200px !important;
+      max-width: 90vw !important;
+      background-color: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 40px !important; /* Bo tròn sang trọng */
+      padding: 8px 24px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+      transition: all 0.3s ease !important;
       text-decoration: none !important;
   }
   [data-testid="stPageLink"]:hover {
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-      border-color: #003366 !important;
-      box-shadow: 0 4px 14px rgba(0, 51, 102, 0.08) !important;
-      transform: translateY(-1px);
+      background-color: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
+      transform: translateY(-1px) !important;
   }
   [data-testid="stPageLink"] span {
       white-space: nowrap !important;
       overflow: visible !important;
-      text-overflow: unset !important;      /* Triệt tiêu hoàn toàn dấu chấm lửng (...) */
+      text-overflow: clip !important; /* Chống xuất hiện dấu 3 chấm (...) */
       font-family: 'Times New Roman', Times, serif !important;
-      font-size: 15px !important;
+      font-size: 15.5px !important;
       color: #003366 !important;
       font-weight: 600 !important;
-      letter-spacing: 0.3px !important;
+      letter-spacing: 0.2px !important;
   }
 
   /* ---------- phông chữ ---------- */
@@ -119,7 +125,7 @@ st.markdown("""
   }
 
   /* kéo nội dung lên sát đỉnh vì header đã bị thu về 0 */
-  .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; }
+  .block-container { padding-top: 1.2rem !important; padding-bottom: 3rem !important; max-width: 900px !important; }
 
   /* Component HTML: bỏ viền. Riêng cái cao 0 (đoạn JS dọn trang bao) thì
      không được chiếm chỗ. KHÔNG ẩn tất cả — nút loa cũng là component. */
