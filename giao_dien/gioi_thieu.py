@@ -7,24 +7,22 @@ from pathlib import Path
 from core import auth
 
 # ==============================================================================
-# TỐI ƯU GIAO DIỆN: Xóa khoảng trắng thừa phía trên của Streamlit
+# ÉP SÁT LỀ VÀ XÓA KHOẢNG TRẮNG THỪA TRÊN ĐẦU TRANG
 # ==============================================================================
 st.markdown("""
 <style>
     .block-container {
         padding-top: 1rem !important;
         padding-bottom: 2rem !important;
+        max-width: 100% !important;
     }
+    header {visibility: hidden;} /* Ẩn header mặc định của Streamlit nếu tạo khoảng trắng lớn */
 </style>
 """, unsafe_allow_html=True)
 
-# ==============================================================================
-# CƠ CHẾ LƯU TRỮ FILE CỨNG AN TOÀN (Mã hóa UTF-8 chống lỗi font)
-# ==============================================================================
 DATA_FILE = "data/gioi_thieu.md"
 
 def load_intro_content():
-    """Đọc nội dung giới thiệu từ file cứng với chuẩn UTF-8, có dự phòng nội dung mặc định."""
     try:
         if os.path.exists(DATA_FILE):
             with open(DATA_FILE, "r", encoding="utf-8") as f:
@@ -34,7 +32,6 @@ def load_intro_content():
     except Exception:
         pass
     
-    # Nội dung mặc định chuẩn tiếng Việt nếu file trống hoặc lỗi
     return """<h2 style="text-align: center; color: #003366;">GIỚI THIỆU DỰ ÁN</h2>
 <h2 style="text-align: center; color: #003366;">LUẬT GẦN BẢN</h2>
 <p style="text-align: center;"><b>Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số</b></p>
@@ -45,7 +42,6 @@ def load_intro_content():
 """
 
 def save_intro_content(content):
-    """Ghi đè nội dung mới ra file cứng với mã hóa UTF-8 vĩnh viễn."""
     try:
         os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
         with open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -56,7 +52,6 @@ def save_intro_content(content):
         return False
 
 def docx_to_exact_html(docx_file) -> str:
-    """Bộ phân tích file Word (.docx) chuyên sâu: giữ nguyên căn lề, màu sắc, định dạng và hình ảnh."""
     try:
         import docx
         from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -65,7 +60,6 @@ def docx_to_exact_html(docx_file) -> str:
         html_parts = []
         
         for p in doc.paragraphs:
-            # Xác định căn lề chuẩn
             align_style = "text-align: left;"
             if p.alignment == WD_ALIGN_PARAGRAPH.CENTER:
                 align_style = "text-align: center;"
@@ -78,7 +72,6 @@ def docx_to_exact_html(docx_file) -> str:
             for run in p.runs:
                 text = run.text
                 if not text:
-                    # Trích xuất hình ảnh nhúng bên trong đoạn văn bản
                     try:
                         drawings = run._r.xpath('.//a:blip')
                         for blip in drawings:
@@ -87,14 +80,12 @@ def docx_to_exact_html(docx_file) -> str:
                                 image_part = doc.part.related_parts[embed]
                                 image_bytes = image_part.blob
                                 b64_img = base64.b64encode(image_bytes).decode('utf-8')
-                                p_content.append(f'<div style="text-align: center;"><img src="data:image/png;base64,{b64_img}" style="max-width: 100%; height: auto; margin: 20px auto; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" /></div>')
+                                p_content.append(f'<div style="text-align: center;"><img src="data:image/png;base64,{b64_img}" style="max-width: 100%; height: auto; margin: 20px auto; border-radius: 6px;" /></div>')
                     except Exception:
                         pass
                     continue
                 
-                # Chống lỗi ký tự đặc biệt (XSS/HTML Escaping an toàn tuyệt đối)
                 safe_text = html.escape(text)
-                
                 style_runs = []
                 if run.bold:
                     safe_text = f"<b>{safe_text}</b>"
@@ -106,9 +97,7 @@ def docx_to_exact_html(docx_file) -> str:
                     style_runs.append(f"color: {hex_color};")
                 
                 if style_runs:
-                    style_str = " ".join(style_runs)
-                    safe_text = f'<span style="{style_str}">{safe_text}</span>'
-                
+                    safe_text = f'<span style="{" ".join(style_runs)}">{safe_text}</span>'
                 p_content.append(safe_text)
             
             full_p_text = "".join(p_content)
@@ -119,10 +108,8 @@ def docx_to_exact_html(docx_file) -> str:
                     tag = "h2"
                 elif "heading 2" in style_name:
                     tag = "h3"
-                
                 html_parts.append(f'<{tag} style="{align_style} margin-bottom: 12px;">{full_p_text}</{tag}>')
         
-        # Xử lý bảng biểu (tables) chuẩn xác với cuộn ngang trên mobile
         for table in doc.tables:
             table_html = ['<div style="overflow-x: auto; margin: 20px 0;"><table style="border-collapse: collapse; width: 100%;">']
             for row in table.rows:
@@ -138,85 +125,45 @@ def docx_to_exact_html(docx_file) -> str:
         st.error(f"Không thể đọc file Word: {e}")
         return ""
 
-# Nạp dữ liệu vào bộ nhớ tạm an toàn
 if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
-# Nút điều hướng quay lại trang chủ Hỏi đáp
-if st.button("⬅️ Quay lại trang Hỏi đáp chính"):
-    st.switch_page("giao_dien/cong_dan.py")
+# Nút điều hướng gọn gàng
+col1, col2 = st.columns([1, 4])
+with col1:
+    if st.button("⬅️ Quay lại", use_container_width=True):
+        st.switch_page("giao_dien/cong_dan.py")
 
-st.markdown("---")
-st.title("📖 Giới thiệu Dự án & Ý nghĩa")
+st.markdown("<h2 style='text-align: center; color: #003366; margin-top: 0;'>📖 Giới thiệu Dự án & Ý nghĩa</h2>", unsafe_allow_html=True)
 
-# Lấy thông tin tài khoản đang đăng nhập để kiểm tra phân quyền
 u = auth.nguoi_dang_nhap()
 
-# ==============================================================================
-# LOGIC PHÂN QUYỀN ADMIN: Quản trị nội dung an toàn, mượt mà
-# ==============================================================================
 if u and u.get("vai_tro") == "admin":
     with st.expander("⚙️ BẢNG ĐIỀU KHIỂN ADMIN - CHỈNH SỬA NỘI DUNG", expanded=False):
-        st.warning("Bạn đang đăng nhập bằng tài khoản Quản trị viên. Mọi thay đổi sẽ được lưu vĩnh viễn vào hệ thống.")
-        
-        tab_soan, tab_file = st.tabs(["✍️ Soạn thảo trực tiếp", "📁 Tải file lên (.md, .txt, .docx)"])
-        
+        tab_soan, tab_file = st.tabs(["✍️ Soạn thảo", "📁 Tải file lên"])
         with tab_soan:
-            updated_content = st.text_area(
-                "Soạn thảo nội dung giới thiệu (hỗ trợ HTML/Markdown):", 
-                value=st.session_state["intro_content"], 
-                height=300
-            )
-            if st.button("💾 Lưu nội dung soạn thảo", type="primary"):
+            updated_content = st.text_area("Nội dung:", value=st.session_state["intro_content"], height=250)
+            if st.button("💾 Lưu nội dung", type="primary"):
                 if save_intro_content(updated_content):
                     st.session_state["intro_content"] = updated_content
-                    st.success("Đã lưu và cập nhật hệ thống thành công!")
+                    st.success("Đã lưu thành công!")
                     st.rerun()
-                
         with tab_file:
-            st.caption("Tải lên file Markdown, Text hoặc Word (.docx). Hệ thống tự động bóc tách giữ nguyên định dạng gốc.")
-            uploaded_file = st.file_uploader("Chọn file tài liệu tải lên", type=["md", "txt", "docx"])
-            
+            uploaded_file = st.file_uploader("Tải file (.md, .txt, .docx)", type=["md", "txt", "docx"])
             if uploaded_file is not None:
-                file_content = ""
-                
-                if uploaded_file.name.endswith(".docx"):
-                    file_content = docx_to_exact_html(uploaded_file)
-                else:
-                    try:
-                        file_content = uploaded_file.read().decode("utf-8")
-                    except Exception:
-                        try:
-                            file_content = uploaded_file.read().decode("latin-1")
-                        except Exception as e:
-                            st.error(f"Lỗi giải mã file: {e}")
-                
-                if file_content:
-                    st.caption("Xem trước bố cục tài liệu:")
-                    preview_html = f"""
-                    <div style="background: #ffffff; color: #000000; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: 'Times New Roman', Times, serif; line-height: 1.7; max-height: 400px; overflow-y: auto; margin-bottom: 20px; box-sizing: border-box;">
-                        {file_content}
-                    </div>
-                    """
-                    st.markdown(preview_html, unsafe_allow_html=True)
-                    
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    if st.button("🚀 Xác nhận cập nhật từ file", type="primary", use_container_width=True):
-                        if save_intro_content(file_content):
-                            st.session_state["intro_content"] = file_content
-                            st.success("Đã cập nhật nội dung chuẩn định dạng từ file thành công!")
-                            st.rerun()
-                
-    st.markdown("---")
+                file_content = docx_to_exact_html(uploaded_file) if uploaded_file.name.endswith(".docx") else uploaded_file.read().decode("utf-8", errors="ignore")
+                if file_content and st.button("🚀 Xác nhận cập nhật", type="primary", use_container_width=True):
+                    if save_intro_content(file_content):
+                        st.session_state["intro_content"] = file_content
+                        st.success("Cập nhật thành công!")
+                        st.rerun()
 
-# ==============================================================================
-# HIỂN THỊ NỘI DUNG CHÍNH (Responsive chuẩn mực hoàn hảo cho cả PC và Mobile)
-# ==============================================================================
+# Khung hiển thị nội dung chính với chuẩn Responsive tuyệt đối
 document_html = f"""
 <div style="
     background: #ffffff;
     color: #111111;
-    padding: clamp(15px, 4vw, 50px);
+    padding: clamp(15px, 4vw, 40px);
     margin: 10px auto;
     max-width: 900px;
     width: 100%;
@@ -228,43 +175,13 @@ document_html = f"""
     box-sizing: border-box;
 ">
     <style>
-        img {{
-            max-width: 100% !important;
-            height: auto !important;
-            display: block !important;
-            margin: 25px auto !important;
-            border-radius: 6px !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
-        }}
-        h2, h3, h4 {{
-            color: #003366 !important;
-            font-family: 'Times New Roman', Times, serif !important;
-            font-weight: bold !important;
-            margin-top: 25px !important;
-            margin-bottom: 12px !important;
-            word-wrap: break-word;
-        }}
-        p {{
-            margin-bottom: 15px !important;
-            word-wrap: break-word;
-        }}
-        table {{
-            border-collapse: collapse;
-            width: 100%;
-            margin: 20px 0;
-        }}
-        th, td {{
-            border: 1px solid #cccccc;
-            padding: 10px 14px;
-            text-align: left;
-        }}
-        div[style*="overflow-x: auto"] {{
-            width: 100%;
-            overflow-x: auto;
-        }}
+        img {{ max-width: 100% !important; height: auto !important; display: block !important; margin: 20px auto !important; border-radius: 6px; }}
+        h2, h3, h4 {{ color: #003366 !important; font-family: 'Times New Roman', Times, serif !important; word-wrap: break-word; }}
+        p {{ word-wrap: break-word; }}
+        table {{ border-collapse: collapse; width: 100%; margin: 15px 0; }}
+        th, td {{ border: 1px solid #cccccc; padding: 8px 12px; text-align: left; }}
     </style>
     {st.session_state["intro_content"]}
 </div>
 """
-
 st.markdown(document_html, unsafe_allow_html=True)
