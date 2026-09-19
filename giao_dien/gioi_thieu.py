@@ -112,13 +112,13 @@ def docx_to_exact_html(docx_file) -> str:
         
         # Xử lý bảng biểu (tables) chuẩn xác
         for table in doc.tables:
-            table_html = ['<table style="border-collapse: collapse; width: 100%; margin: 20px 0;">']
+            table_html = ['<div style="overflow-x: auto; margin: 20px 0;"><table style="border-collapse: collapse; width: 100%;">']
             for row in table.rows:
                 table_html.append('<tr>')
                 for cell in row.cells:
                     table_html.append(f'<td style="border: 1px solid #cccccc; padding: 10px 14px; text-align: left;">{html.escape(cell.text)}</td>')
                 table_html.append('</tr>')
-            table_html.append('</table>')
+            table_html.append('</table></div>')
             html_parts.append("".join(table_html))
             
         return "\n".join(html_parts)
@@ -182,7 +182,7 @@ if u and u.get("vai_tro") == "admin":
                 if file_content:
                     st.caption("Xem trước bố cục tài liệu:")
                     preview_html = f"""
-                    <div style="background: #ffffff; color: #000000; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: 'Times New Roman', Times, serif; line-height: 1.7; max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+                    <div style="background: #ffffff; color: #000000; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-family: 'Times New Roman', Times, serif; line-height: 1.7; max-height: 400px; overflow-y: auto; margin-bottom: 20px; box-sizing: border-box;">
                         {file_content}
                     </div>
                     """
@@ -198,20 +198,22 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("---")
 
 # ==============================================================================
-# HIỂN THỊ NỘI DUNG CHÍNH (Giao diện trang tài liệu chuẩn mực, mượt mà)
+# HIỂN THỊ NỘI DUNG CHÍNH (Responsive hoàn hảo cho máy tính và điện thoại)
 # ==============================================================================
 document_html = f"""
 <div style="
     background: #ffffff;
     color: #111111;
-    padding: 50px 60px;
+    padding: clamp(15px, 4vw, 50px);
     margin: 10px auto;
     max-width: 900px;
+    width: 100%;
     border-radius: 6px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     font-family: 'Times New Roman', Times, serif;
     line-height: 1.7;
-    font-size: 17px;
+    font-size: clamp(15px, 1.8vw, 17px);
+    box-sizing: border-box;
 ">
     <style>
         img {{
@@ -228,9 +230,11 @@ document_html = f"""
             font-weight: bold !important;
             margin-top: 25px !important;
             margin-bottom: 12px !important;
+            word-wrap: break-word;
         }}
         p {{
             margin-bottom: 15px !important;
+            word-wrap: break-word;
         }}
         table {{
             border-collapse: collapse;
@@ -241,6 +245,10 @@ document_html = f"""
             border: 1px solid #cccccc;
             padding: 10px 14px;
             text-align: left;
+        }}
+        div[style*="overflow-x: auto"] {{
+            width: 100%;
+            overflow-x: auto;
         }}
     </style>
     {st.session_state["intro_content"]}
