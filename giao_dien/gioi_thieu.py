@@ -51,6 +51,12 @@ st.markdown("""
         color: #003366 !important;
         font-weight: 600 !important;
     }
+
+    /* Tối ưu thanh chọn ngôn ngữ góc trên bên trái */
+    [data-testid="stSegmentedControl"] {
+        display: inline-flex !important;
+        justify-content: flex-start !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -64,6 +70,9 @@ st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
 # Xác định đường dẫn tuyệt đối đến file lưu trữ
 DATA_DIR = ROOT / "data"
 DATA_FILE = DATA_DIR / "gioi_thieu.md"
+
+# Đường dẫn đến file âm thanh tiếng Mông thu sẵn
+AUDIO_MONG_FILE = ROOT / "audio" / "gioi_thieu_mong.m4a"
 
 def load_intro_content():
     """Đọc nội dung từ file cứng, nếu chưa có thì trả về nội dung mặc định."""
@@ -84,6 +93,26 @@ def load_intro_content():
 <hr>
 <h3>I. Bối cảnh và bài toán xã hội</h3>
 <p>Trong tiến trình chuyển đổi số quốc gia, hạ tầng công nghệ và điện lưới đã cơ bản phủ sóng đến các bản làng vùng cao. Tuy nhiên, rào cản về ngôn ngữ và chữ viết vẫn là thách thức lớn đối với đồng bào khi thực hiện các thủ tục hành chính thiết yếu.</p>
+"""
+
+def load_intro_mong_content():
+    """Nội dung tiếng Mông cho đồng bào"""
+    mong_file = DATA_DIR / "gioi_thieu_mong.md"
+    try:
+        if mong_file.exists():
+            content = mong_file.read_text(encoding="utf-8")
+            if content.strip():
+                return content
+    except Exception:
+        pass
+    
+    return """<h2 style="text-align: center; color: #003366;">PROJECT KONG ZOX</h2>
+<h2 style="text-align: center; color: #003366;">LUẬT GẦN BẢN</h2>
+<p style="text-align: center;"><b>Peb pab cov kwv tij hmoob daws teeb meem ntaub ntawv los ntawm lus Hmoob</b></p>
+<p style="text-align: center;"><i>“Hloov pauv digital: Tsis tso leej twg tseg”</i></p>
+<hr>
+<h3>I. Keeb kwm thiab teeb meem hauv zej zog</h3>
+<p>Nyob rau hauv txoj kev hloov pauv digital hauv tebchaws, cov tshuab hluav taws xob thiab kev tshawb fawb tau mus txog tej zos hauv roob. Txawm li cas los xij, teeb meem lus los yog ntawv sau tseem yog ib qho nyuaj rau peb cov kwv tij thaum ua cov ntaub ntawv tseem ceeb.</p>
 """
 
 def save_intro_content(content):
@@ -235,6 +264,31 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
+# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI PHẦN CHỮ) & PHÁT ÂM THANH
+# ==============================================================================
+col_lang, col_space = st.columns([3, 7])
+with col_lang:
+    selected_lang = st.segmented_control(
+        "Chọn ngôn ngữ hiển thị và phát âm",
+        options=["🔊 Tiếng Việt", "🔊 Tiếng Mông"],
+        default="🔊 Tiếng Việt",
+        key="intro_language_selector",
+        label_visibility="collapsed"
+    )
+
+# Logic xử lý hiển thị nội dung và phát file âm thanh tiếng Mông thu sẵn
+if selected_lang == "🔊 Tiếng Mông":
+    display_content = load_intro_mong_content()
+    if AUDIO_MONG_FILE.exists():
+        st.audio(str(AUDIO_MONG_FILE), format="audio/mp4", autoplay=True)
+    else:
+        st.info("💡 Chưa tìm thấy file âm thanh tiếng Mông tại thư mục `audio/gioi_thieu_mong.m4a`.")
+else:
+    display_content = st.session_state["intro_content"]
+
+st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+
+# ==============================================================================
 # HIỂN THỊ NỘI DUNG CHÍNH (Responsive mượt mà trên cả PC và Mobile)
 # ==============================================================================
 document_html = f"""
@@ -287,7 +341,7 @@ document_html = f"""
             text-align: left;
         }}
     </style>
-    {st.session_state["intro_content"]}
+    {display_content}
 </div>
 """
 
