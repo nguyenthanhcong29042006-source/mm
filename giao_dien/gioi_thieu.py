@@ -5,7 +5,6 @@ import base64
 import html
 from pathlib import Path
 from core import auth
-from gtts import gTTS  # Thư viện chuyển văn bản thành giọng nói tiếng Việt tự động
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -72,8 +71,9 @@ st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
 DATA_DIR = ROOT / "data"
 DATA_FILE = DATA_DIR / "gioi_thieu.md"
 
-# Đường dẫn đến file âm thanh tiếng Mông thu sẵn
+# Đường dẫn đến các file âm thanh thu sẵn trong thư mục audio
 AUDIO_MONG_FILE = ROOT / "audio" / "gioi_thieu_mong.m4a"
+AUDIO_VI_FILE = ROOT / "audio" / "gioi_thieu_vi.m4a"
 
 def load_intro_content():
     """Đọc nội dung từ file cứng, nếu chưa có thì trả về nội dung mặc định."""
@@ -263,7 +263,7 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
-# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI PHẦN CHỮ) & TỰ ĐỘNG PHÁT ÂM THANH
+# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI PHẦN CHỮ) & PHÁT ÂM THANH MƯỢT MÀ
 # ==============================================================================
 col_lang, col_space = st.columns([3, 7])
 with col_lang:
@@ -275,7 +275,7 @@ with col_lang:
         label_visibility="collapsed"
     )
 
-# Xử lý phát âm thanh tự động tương ứng với lựa chọn của người dùng
+# Xử lý phát file âm thanh tương ứng cực nhanh không độ trễ
 if selected_lang == "🔊 Tiếng Mông":
     display_content = load_intro_mong_content()
     if AUDIO_MONG_FILE.exists():
@@ -284,20 +284,8 @@ if selected_lang == "🔊 Tiếng Mông":
         st.warning("⚠️ Đang cập nhật tệp âm thanh tiếng Mông trong thư mục `audio/gioi_thieu_mong.m4a`.")
 else:
     display_content = st.session_state["intro_content"]
-    # Tự động tạo giọng đọc tiếng Việt bằng gTTS từ đoạn mở đầu giới thiệu
-    try:
-        tts_text = "Giới thiệu dự án Luật Gần Bản. Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số."
-        tts_file = DATA_DIR / "intro_vi.mp3"
-        
-        # Chỉ tạo file audio mới nếu chưa có để tối ưu tốc độ không bị delay
-        if not tts_file.exists():
-            tts = gTTS(text=tts_text, lang='vi', slow=False)
-            tts.save(str(tts_file))
-            
-        if tts_file.exists():
-            st.audio(str(tts_file), format="audio/mp3", autoplay=True)
-    except Exception:
-        pass
+    if AUDIO_VI_FILE.exists():
+        st.audio(str(AUDIO_VI_FILE), format="audio/mp4", autoplay=True)
 
 st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
