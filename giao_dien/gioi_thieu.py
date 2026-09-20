@@ -5,6 +5,7 @@ import base64
 import html
 from pathlib import Path
 from core import auth
+from gtts import gTTS  # Thư viện AI chuyển văn bản tiếng Việt thành giọng nói tự động
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -71,9 +72,8 @@ st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
 DATA_DIR = ROOT / "data"
 DATA_FILE = DATA_DIR / "gioi_thieu.md"
 
-# Đường dẫn đến các file âm thanh thu sẵn trong thư mục audio
+# Đường dẫn đến file âm thanh tiếng Mông thu sẵn
 AUDIO_MONG_FILE = ROOT / "audio" / "gioi_thieu_mong.m4a"
-AUDIO_VI_FILE = ROOT / "audio" / "gioi_thieu_vi.m4a"
 
 def load_intro_content():
     """Đọc nội dung từ file cứng, nếu chưa có thì trả về nội dung mặc định."""
@@ -263,7 +263,7 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
-# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI PHẦN CHỮ) & PHÁT ÂM THANH MƯỢT MÀ
+# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI PHẦN CHỮ) & AI ĐỌC TIẾNG VIỆT
 # ==============================================================================
 col_lang, col_space = st.columns([3, 7])
 with col_lang:
@@ -275,7 +275,7 @@ with col_lang:
         label_visibility="collapsed"
     )
 
-# Xử lý phát file âm thanh tương ứng cực nhanh không độ trễ
+# Logic xử lý phát âm thanh thông minh
 if selected_lang == "🔊 Tiếng Mông":
     display_content = load_intro_mong_content()
     if AUDIO_MONG_FILE.exists():
@@ -284,8 +284,26 @@ if selected_lang == "🔊 Tiếng Mông":
         st.warning("⚠️ Đang cập nhật tệp âm thanh tiếng Mông trong thư mục `audio/gioi_thieu_mong.m4a`.")
 else:
     display_content = st.session_state["intro_content"]
-    if AUDIO_VI_FILE.exists():
-        st.audio(str(AUDIO_VI_FILE), format="audio/mp4", autoplay=True)
+    # Sử dụng AI (gTTS) tự động tạo file giọng đọc tiếng Việt đầy đủ mạch lạc
+    try:
+        vi_tts_file = DATA_DIR / "intro_vi_ai.mp3"
+        if not vi_tts_file.exists():
+            # Nội dung đầy đủ chuẩn xác để AI đọc trọn vẹn mạch lạc
+            full_vi_text = (
+                "Giới thiệu dự án Luật Gần Bản. "
+                "Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số. "
+                "Chuyển đổi số, không để ai bị bỏ lại phía sau. "
+                "Bối cảnh và bài toán xã hội: Trong tiến trình chuyển đổi số quốc gia, hạ tầng công nghệ và điện lưới "
+                "đã cơ bản phủ sóng đến các bản làng vùng cao. Tuy nhiên, rào cản về ngôn ngữ và chữ viết vẫn là thách thức "
+                "lớn đối với đồng bào khi thực hiện các thủ tục hành chính thiết yếu."
+            )
+            tts = gTTS(text=full_vi_text, lang='vi', slow=False)
+            tts.save(str(vi_tts_file))
+            
+        if vi_tts_file.exists():
+            st.audio(str(vi_tts_file), format="audio/mp3", autoplay=True)
+    except Exception:
+        pass
 
 st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
