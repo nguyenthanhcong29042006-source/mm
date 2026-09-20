@@ -60,7 +60,7 @@ st.markdown("---")
 
 
 # ==========================================================================
-# CÁC HÀM CACHE TỐI ƯU TỐC ĐỘ (Lưu trữ kết quả giúp lần sau bấm là ra ngay)
+# CÁC HÀM CACHE SIÊU TỐC (Giúp lưu trữ kết quả, lần sau bấm là ra ngay tức thì)
 # ==========================================================================
 @st.cache_data(ttl=3600, show_spinner=False)
 def _dinh_tuyen(cau_noi: str) -> dict:
@@ -92,7 +92,7 @@ def _tts_vi(text: str) -> str:
 
 @st.cache_data(ttl=24 * 3600, show_spinner=False)
 def _lay_audio_mong(rpa_text: str, key: str) -> tuple[str, str]:
-    """Cache sẵn audio tiếng Mông để không phải gọi lại AI nhiều lần."""
+    """Cache sẵn audio tiếng Mông để không bao giờ phải dịch/đọc lại chậm."""
     try:
         audio, tang = phat_tieng_mong(rpa_text, key=key)
         return str(audio) if audio else "", tang
@@ -172,7 +172,7 @@ def loa(text: str, *, nhan: str = "Nghe", tu_phat: bool = False) -> None:
 
 
 # ==========================================================================
-# PIPELINE (Giữ nguyên toàn bộ logic chuẩn, tối ưu bằng cache bên trong)
+# PIPELINE (Giữ nguyên 100% logic gốc, tốc độ được tối ưu qua cache ngầm)
 # ==========================================================================
 def _thong_diep_loi(e: Exception) -> str:
     if isinstance(e, LoiQuota):
