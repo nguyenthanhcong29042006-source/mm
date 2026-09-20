@@ -241,6 +241,42 @@ def xu_ly_cau_noi(van_ban: str) -> None:
     ss.ket_qua = kq
 
 
+def xu_ly_chon_nhanh(tt) -> None:
+    """Hàm xử lý siêu tốc khi chọn trực tiếp từ danh sách (tức thì, có đầy đủ tiếng Mông)."""
+    ss.cau_noi = tt.ten
+    t0 = time.perf_counter()
+    kq: dict = {"cau_noi": ss.cau_noi, "thoi_gian": {}}
+
+    with st.status("Đang lấy hướng dẫn cho bà con…", expanded=False) as box:
+        kq["tuyen"] = {"can_can_bo": False, "tin_cay_thu_tuc": 1.0, "ten_nhom": "Chọn trực tiếp"}
+        kq["thu_tuc"] = tt
+
+        box.write("Đang đọc hướng dẫn…")
+        try:
+            kq["don_gian"] = _don_gian_hoa(tt.key, CAU_HOI_MAC_DINH)
+        except Exception:
+            kq["don_gian"] = {"tom_tat_1_cau": f"Hướng dẫn {tt.ten}"}
+
+        kq["kich_ban"] = thanh_van_ban_doc(kq["don_gian"])
+        kq["audio_viet"] = _tts_vi(kq["kich_ban"])
+
+        box.write("Đang chuẩn bị tiếng Mông…")
+        try:
+            kq["mong"] = _dich_mong(kq["kich_ban"])
+            audio, tang = phat_tieng_mong(kq["mong"]["rpa"], key=tt.key)
+            kq["audio_mong"] = str(audio) if audio else ""
+            kq["tang_tts"] = tang
+        except Exception as e:
+            kq["canh_bao"] = "Phần tiếng Mông chưa sẵn sàng, bà con nghe tạm tiếng Việt nhé."
+            kq["_loi_mong"] = str(e)
+
+        kq["thoi_gian"]["tong"] = time.perf_counter() - t0
+        box.update(label="Đã có hướng dẫn", state="complete", expanded=False)
+
+    kq["la_tieng_mong"] = bool(ss.get("la_tieng_mong", True))
+    ss.ket_qua = kq
+
+
 # ==========================================================================
 # 1. CHỌN TIẾNG
 # ==========================================================================
@@ -454,7 +490,7 @@ with st.expander("⌨️ Không nói được? Gõ chữ hoặc chọn từ danh
         else:
             tt_chon = st.selectbox("Thủ tục cụ thể", ds, format_func=lambda t: t.ten)
             if st.button("Xem hướng dẫn", type="primary", use_container_width=True):
-                xu_ly_cau_noi(tt_chon.ten)
+                xu_ly_chon_nhanh(tt_chon)
                 st.rerun()
 
 st.markdown('</div>', unsafe_allow_html=True)
