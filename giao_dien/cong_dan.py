@@ -241,38 +241,6 @@ def xu_ly_cau_noi(van_ban: str) -> None:
     ss.ket_qua = kq
 
 
-def xu_ly_chon_nhanh(tt) -> None:
-    """Hàm xử lý siêu tốc khi chọn trực tiếp thủ tục từ danh sách (0 độ trễ)."""
-    ss.cau_noi = f"Chọn thủ tục: {tt.ten}"
-    t0 = time.perf_counter()
-    kq: dict = {"cau_noi": ss.cau_noi, "thoi_gian": {}}
-    
-    # Gán trực tiếp thủ tục được chọn mà không cần qua bước định tuyến và LLM chậm chạp
-    kq["tuyen"] = {"can_can_bo": False, "tin_cay_thu_tuc": 1.0, "ten_nhom": "Chọn trực tiếp"}
-    kq["thu_tuc"] = tt
-    
-    # Lấy ngay dữ liệu đơn giản hóa từ cache sẵn
-    try:
-        kq["don_gian"] = _don_gian_hoa(tt.key, CAU_HOI_MAC_DINH)
-    except Exception:
-        kq["don_gian"] = {"tom_tat_1_cau": f"Hướng dẫn thủ tục {tt.ten}", "di_dau": {"noi_don_gian": "Bộ phận Một cửa"}, "mang_gi": []}
-        
-    kq["kich_ban"] = thanh_van_ban_doc(kq["don_gian"])
-    kq["audio_viet"] = _tts_vi(kq["kich_ban"])
-    
-    # Thử gọi audio tiếng Mông đã cache/thu sẵn nếu có
-    try:
-        audio, tang = phat_tieng_mong(tt.ten, key=tt.key)
-        kq["audio_mong"] = str(audio) if audio else ""
-        kq["tang_tts"] = tang
-    except Exception:
-        kq["audio_mong"] = ""
-
-    kq["thoi_gian"]["tong"] = time.perf_counter() - t0
-    kq["la_tieng_mong"] = bool(ss.get("la_tieng_mong", True))
-    ss.ket_qua = kq
-
-
 # ==========================================================================
 # 1. CHỌN TIẾNG
 # ==========================================================================
@@ -304,6 +272,7 @@ audio_in = st.audio_input("Bấm micro để nói", label_visibility="collapsed"
 if audio_in is not None:
     raw = audio_in.getvalue()
     van_tay = hashlib.sha256(raw).hexdigest()[:16]
+    # Hạ ngưỡng từ 2000 xuống 50 bytes để xử lý ngay cả câu nói ngắn gọn nhất
     if van_tay != ss.audio_da_xu_ly and len(raw) > 50:
         ss.audio_da_xu_ly = van_tay
         with st.spinner("Đang nghe bà con nói…"):
@@ -485,8 +454,7 @@ with st.expander("⌨️ Không nói được? Gõ chữ hoặc chọn từ danh
         else:
             tt_chon = st.selectbox("Thủ tục cụ thể", ds, format_func=lambda t: t.ten)
             if st.button("Xem hướng dẫn", type="primary", use_container_width=True):
-                # Sử dụng hàm xử lý siêu tốc để trả kết quả tức thì không có độ trễ
-                xu_ly_chon_nhanh(tt_chon)
+                xu_ly_cau_noi(tt_chon.ten)
                 st.rerun()
 
 st.markdown('</div>', unsafe_allow_html=True)
