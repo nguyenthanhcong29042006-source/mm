@@ -60,7 +60,7 @@ st.markdown("---")
 
 
 # ==========================================================================
-# CÁC HÀM CACHE SIÊU TỐC (Giúp lưu trữ kết quả, lần sau bấm là ra ngay tức thì)
+# HÀM CÓ CACHE (giảm độ trễ: lần 2 trở đi gần như tức thì)
 # ==========================================================================
 @st.cache_data(ttl=3600, show_spinner=False)
 def _dinh_tuyen(cau_noi: str) -> dict:
@@ -88,16 +88,6 @@ def _tts_vi(text: str) -> str:
         return str(p) if p else ""
     except Exception:
         return ""
-
-
-@st.cache_data(ttl=24 * 3600, show_spinner=False)
-def _lay_audio_mong(rpa_text: str, key: str) -> tuple[str, str]:
-    """Cache sẵn audio tiếng Mông để không bao giờ phải dịch/đọc lại chậm."""
-    try:
-        audio, tang = phat_tieng_mong(rpa_text, key=key)
-        return str(audio) if audio else "", tang
-    except Exception:
-        return "", ""
 
 
 @st.cache_data(ttl=24 * 3600, show_spinner=False)
@@ -172,7 +162,7 @@ def loa(text: str, *, nhan: str = "Nghe", tu_phat: bool = False) -> None:
 
 
 # ==========================================================================
-# PIPELINE (Giữ nguyên 100% logic gốc, tốc độ được tối ưu qua cache ngầm)
+# PIPELINE
 # ==========================================================================
 def _thong_diep_loi(e: Exception) -> str:
     if isinstance(e, LoiQuota):
@@ -231,7 +221,7 @@ def chay_pipeline(cau_noi: str, *, phat_giong_mong: bool = True) -> dict:
                 kq["thoi_gian"]["dich"] = time.perf_counter() - t
 
                 t = time.perf_counter()
-                audio, tang = _lay_audio_mong(kq["mong"]["rpa"], key=tt.key)
+                audio, tang = phat_tieng_mong(kq["mong"]["rpa"], key=tt.key)
                 kq["thoi_gian"]["tts"] = time.perf_counter() - t
                 kq["audio_mong"] = str(audio) if audio else ""
                 kq["tang_tts"] = tang
