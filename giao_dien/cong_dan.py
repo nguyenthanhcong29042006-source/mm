@@ -60,12 +60,12 @@ st.markdown("---")
 
 
 # ==========================================================================
-# HÀM CÓ CACHE TỐI ƯU SIÊU TỐC (Lưu trữ vĩnh viễn kết quả sau lần chạy đầu)
+# HÀM CÓ CACHE TỐI ƯU TOÀN DIỆN (Đảm bảo tốc độ cực nhanh, không nghẽn)
 # ==========================================================================
 @st.cache_data(ttl=3600, show_spinner=False)
 def _dinh_tuyen(cau_noi: str) -> dict:
     r = dinh_tuyen(cau_noi)
-    r["_key"] = r["thu_tuc"].key if r["thu_tuc"] else ""    # ThuTuc không hash được
+    r["_key"] = r["thu_tuc"].key if r["thu_tuc"] else ""
     r.pop("thu_tuc", None)
     return r
 
@@ -92,7 +92,7 @@ def _tts_vi(text: str) -> str:
 
 @st.cache_data(ttl=24 * 3600, show_spinner=False)
 def _lay_audio_mong(rpa_text: str, key: str) -> tuple[str, str]:
-    """Cache sẵn âm thanh tiếng Mông để lần sau bấm là ra ngay tức thì."""
+    """Cache sẵn âm thanh tiếng Mông để lần sau tải ngay lập tức."""
     try:
         audio, tang = phat_tieng_mong(rpa_text, key=key)
         return str(audio) if audio else "", tang
@@ -172,7 +172,7 @@ def loa(text: str, *, nhan: str = "Nghe", tu_phat: bool = False) -> None:
 
 
 # ==========================================================================
-# PIPELINE TỐI ƯU TỐC ĐỘ (Dùng Cache triệt để)
+# PIPELINE CHÍNH & XỬ LÝ SIÊU TỐC
 # ==========================================================================
 def _thong_diep_loi(e: Exception) -> str:
     if isinstance(e, LoiQuota):
@@ -252,7 +252,7 @@ def xu_ly_cau_noi(van_ban: str) -> None:
 
 
 def xu_ly_chon_nhanh(tt) -> None:
-    """Hàm xử lý siêu tốc khi chọn trực tiếp từ danh sách (tức thì nhờ cache)."""
+    """Logic tối ưu hoàn hảo: Xử lý trực tiếp thủ tục được chọn, bỏ qua định tuyến rườm rà."""
     ss.cau_noi = tt.ten
     t0 = time.perf_counter()
     kq: dict = {"cau_noi": ss.cau_noi, "thoi_gian": {}}
@@ -500,7 +500,7 @@ with st.expander("⌨️ Không nói được? Gõ chữ hoặc chọn từ danh
         else:
             tt_chon = st.selectbox("Thủ tục cụ thể", ds, format_func=lambda t: t.ten)
             if st.button("Xem hướng dẫn", type="primary", use_container_width=True):
-                # Sử dụng hàm xử lý siêu tốc đã qua cache (lần sau bấm ra kết quả ngay tức thì)
+                # Sử dụng hàm xử lý tối ưu siêu tốc riêng cho phần chọn trực tiếp
                 xu_ly_chon_nhanh(tt_chon)
                 st.rerun()
 
