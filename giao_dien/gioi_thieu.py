@@ -5,7 +5,6 @@ import base64
 import html
 from pathlib import Path
 from core import auth
-from gTTS import gTTS  # Thư viện AI chuyển toàn bộ văn bản tiếng Việt thành giọng nói
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -71,8 +70,9 @@ st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
 DATA_DIR = ROOT / "data"
 DATA_FILE = DATA_DIR / "gioi_thieu.md"
 
-# Đường dẫn đến file âm thanh tiếng Mông thu sẵn
+# Đường dẫn đến các file âm thanh thu sẵn trong thư mục audio
 AUDIO_MONG_FILE = ROOT / "audio" / "gioi_thieu_mong.m4a"
+AUDIO_VI_FILE = ROOT / "audio" / "gioi_thieu_vi.m4a"
 
 def load_intro_content():
     """Đọc nội dung từ file cứng, nếu chưa có thì trả về nội dung chuẩn đầy đủ."""
@@ -271,7 +271,7 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
-# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI) & PHÁT ÂM THANH KHI CHỦ ĐỘNG BẤM
+# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI) & PHÁT ÂM THANH M4A CHUẨN
 # ==============================================================================
 col_lang, col_space = st.columns([3, 7])
 with col_lang:
@@ -291,37 +291,12 @@ if selected_lang == "🔊 Tiếng Mông":
     if AUDIO_MONG_FILE.exists():
         st.audio(str(AUDIO_MONG_FILE), format="audio/mp4", autoplay=True)
     else:
-        st.warning("⚠️ Đang cập nhật tệp âm thanh tiếng Mông tại thư mục `audio/gioi_thieu_mong.m4a`.")
+        st.warning("⚠️ Chưa tìm thấy file âm thanh tiếng Mông tại thư mục `audio/gioi_thieu_mong.m4a`.")
 elif selected_lang == "🔊 Tiếng Việt":
-    try:
-        vi_tts_file = DATA_DIR / "intro_vi_full_ai.mp3"
-        # Tự động dùng AI tổng hợp TRỌN VẸN toàn bộ nội dung văn bản từ đầu đến cuối nếu chưa có
-        if not vi_tts_file.exists():
-            full_vi_text = (
-                "Giới thiệu dự án Luật Gần Bản. "
-                "Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số. "
-                "Chuyển đổi số: Không để ai bị bỏ lại phía sau. "
-                "I. Bối cảnh và bài toán xã hội. "
-                "Trong tiến trình chuyển đổi số quốc gia, hạ tầng công nghệ, điện lưới và điện thoại thông minh đã cơ bản phủ sóng đến các bản làng vùng cao. "
-                "Tuy nhiên, một nghịch lý vẫn đang diễn ra tại bộ phận Một cửa của nhiều ủy ban nhân dân cấp xã: Người dân tộc thiểu số vẫn phải đi lại nhiều lần, thậm chí bỏ cuộc khi thực hiện các thủ tục hành chính thiết yếu như khai sinh, khai tử, kết hôn. "
-                "Đề án nhận diện nguyên nhân cốt lõi không nằm ở khoảng cách địa lý hay sự thiếu hụt thiết bị, mà nằm ở một rào cản vô hình mang tên ngôn ngữ và chữ viết. "
-                "Cụ thể, người dân đang phải đối diện với ba lớp rào cản chồng lấn lên nhau: Rào cản về ngôn ngữ, rào cản về chữ viết và rào cản về thuật ngữ. "
-                "II. Giải pháp Luật Gần Bản. "
-                "Thay vì yêu cầu người dân phải học chữ để hiểu luật, Luật Gần Bản đảo ngược cách tiếp cận: Buộc hệ thống công nghệ phải học cách nói tiếng của người dân. "
-                "Đây là trợ lý ảo hỗ trợ tra cứu thủ tục hành chính, vận hành hoàn toàn bằng giọng nói và định vị là một dự án âm thanh. "
-                "III. Cơ chế vận hành và tính bảo đảm. "
-                "Dự án giải quyết rủi ro của Trí tuệ nhân tạo bằng triết lý: Trí tuệ nhân tạo soạn thảo, con người ký duyệt. "
-                "Mọi câu trả lời phát ra cho người dân đều phải thông qua kiểm duyệt và chịu trách nhiệm công vụ bởi công chức tư pháp hộ tịch. "
-                "IV. Tầm nhìn dài hạn. "
-                "Luật Gần Bản cam kết hiện thực hóa thông điệp sâu sắc nhất của kỷ nguyên số: Chuyển đổi số, không để ai bị bỏ lại phía sau."
-            )
-            tts = gTTS(text=full_vi_text, lang='vi', slow=False)
-            tts.save(str(vi_tts_file))
-            
-        if vi_tts_file.exists():
-            st.audio(str(vi_tts_file), format="audio/mp3", autoplay=True)
-    except Exception as e:
-        st.error(f"Không thể khởi tạo giọng đọc AI: {e}")
+    if AUDIO_VI_FILE.exists():
+        st.audio(str(AUDIO_VI_FILE), format="audio/mp4", autoplay=True)
+    else:
+        st.info("💡 Để nghe đọc tiếng Việt, hãy đặt file âm thanh tiếng Việt vào thư mục `audio/gioi_thieu_vi.m4a`.")
 
 st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
