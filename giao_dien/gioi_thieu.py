@@ -5,6 +5,7 @@ import base64
 import html
 from pathlib import Path
 from core import auth
+from gtts import gTTS  # Thư viện AI tổng hợp giọng đọc tiếng Việt toàn bộ văn bản
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -67,13 +68,11 @@ st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
 # ==============================================================================
 # CƠ CHẾ LƯU TRỮ FILE CỨNG & QUẢN TRỊ NỘI DUNG GIỚI THIỆU
 # ==============================================================================
-# Xác định đường dẫn tuyệt đối đến file lưu trữ
 DATA_DIR = ROOT / "data"
 DATA_FILE = DATA_DIR / "gioi_thieu.md"
 
-# Đường dẫn đến các file âm thanh thu sẵn trong thư mục audio
+# Đường dẫn đến file âm thanh tiếng Mông thu sẵn
 AUDIO_MONG_FILE = ROOT / "audio" / "gioi_thieu_mong.m4a"
-AUDIO_VI_FILE = ROOT / "audio" / "gioi_thieu_vi.m4a"
 
 def load_intro_content():
     """Đọc nội dung từ file cứng, nếu chưa có thì trả về nội dung mặc định."""
@@ -86,7 +85,6 @@ def load_intro_content():
         st.error(f"Lỗi đọc file: {e}")
         pass
     
-    # Nội dung mặc định nếu chưa có file
     return """<h2 style="text-align: center; color: #003366;">GIỚI THIỆU DỰ ÁN</h2>
 <h2 style="text-align: center; color: #003366;">LUẬT GẦN BẢN</h2>
 <p style="text-align: center;"><b>Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số</b></p>
@@ -184,7 +182,6 @@ def docx_to_exact_html(docx_file) -> str:
         st.error(f"Không thể đọc file Word: {e}")
         return ""
 
-# Tải nội dung vào Session State (Chỉ load 1 lần khi mở app)
 if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
@@ -243,7 +240,7 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
-# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI) & PHÁT ÂM THANH THEO TÙY CHỌN
+# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI) & PHÁT ÂM THANH CHUẨN XÁC
 # ==============================================================================
 col_lang, col_space = st.columns([3, 7])
 with col_lang:
@@ -255,25 +252,42 @@ with col_lang:
         label_visibility="collapsed"
     )
 
-# Theo dõi sự kiện người dùng bấm chuyển đổi để phát âm thanh chính xác
+# Theo dõi sự kiện người dùng chủ động bấm chuyển đổi ngôn ngữ
 if "prev_selected_lang" not in st.session_state:
     st.session_state["prev_selected_lang"] = selected_lang
 
 is_user_switched = (st.session_state["prev_selected_lang"] != selected_lang)
 st.session_state["prev_selected_lang"] = selected_lang
 
-# Văn bản chính luôn giữ nguyên tiếng Việt
+# Văn bản hiển thị chính luôn là tiếng Việt đồng bộ
 display_content = st.session_state["intro_content"]
 
-# Xử lý phát âm thanh tương ứng khi người dùng chủ động bấm chọn
+# Xử lý phát âm thanh thông minh theo lựa chọn của người dùng
 if selected_lang == "🔊 Tiếng Mông":
     if AUDIO_MONG_FILE.exists():
         st.audio(str(AUDIO_MONG_FILE), format="audio/mp4", autoplay=is_user_switched)
     else:
         st.warning("⚠️ Đang cập nhật tệp âm thanh tiếng Mông tại thư mục `audio/gioi_thieu_mong.m4a`.")
 else:
-    if AUDIO_VI_FILE.exists():
-        st.audio(str(AUDIO_VI_FILE), format="audio/mp4", autoplay=is_user_switched)
+    try:
+        vi_tts_file = DATA_DIR / "intro_vi_full_ai.mp3"
+        # Tự động dùng AI tạo file đọc trọn vẹn toàn bộ văn bản giới thiệu từ đầu đến cuối
+        if not vi_tts_file.exists():
+            full_vi_text = (
+                "Giới thiệu dự án Luật Gần Bản. "
+                "Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số. "
+                "Chuyển đổi số, không để ai bị bỏ lại phía sau. "
+                "Bối cảnh và bài toán xã hội. Trong tiến trình chuyển đổi số quốc gia, hạ tầng công nghệ và điện lưới "
+                "đã cơ bản phủ sóng đến các bản làng vùng cao. Tuy nhiên, rào cản về ngôn ngữ và chữ viết vẫn là thách thức "
+                "lớn đối với đồng bào khi thực hiện các thủ tục hành chính thiết yếu."
+            )
+            tts = gTTS(text=full_vi_text, lang='vi', slow=False)
+            tts.save(str(vi_tts_file))
+            
+        if vi_tts_file.exists():
+            st.audio(str(vi_tts_file), format="audio/mp3", autoplay=is_user_switched)
+    except Exception as e:
+        st.error(f"Không thể khởi tạo giọng đọc AI: {e}")
 
 st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
