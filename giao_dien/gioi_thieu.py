@@ -5,7 +5,7 @@ import base64
 import html
 from pathlib import Path
 from core import auth
-from gtts import gTTS  # Thư viện AI tổng hợp toàn bộ văn bản tiếng Việt
+from gTTS import gTTS  # Thư viện AI chuyển toàn bộ văn bản tiếng Việt thành giọng nói
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -271,35 +271,28 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
-# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI) & CHỈ PHÁT KHI NGƯỜI DÙNG BẤM
+# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI) & PHÁT ÂM THANH KHI CHỦ ĐỘNG BẤM
 # ==============================================================================
 col_lang, col_space = st.columns([3, 7])
 with col_lang:
     selected_lang = st.segmented_control(
         "Chọn ngôn ngữ phát âm",
         options=["🔊 Tiếng Việt", "🔊 Tiếng Mông"],
-        default="🔊 Tiếng Việt",
+        default=None,  # Không chọn sẵn để tránh tự động phát âm thanh khi mới vào trang
         key="intro_language_selector",
         label_visibility="collapsed"
     )
 
-# Theo dõi sự kiện người dùng chủ động bấm chuyển đổi ngôn ngữ
-if "prev_selected_lang" not in st.session_state:
-    st.session_state["prev_selected_lang"] = selected_lang
-
-is_user_switched = (st.session_state["prev_selected_lang"] != selected_lang)
-st.session_state["prev_selected_lang"] = selected_lang
-
 # Văn bản hiển thị chính luôn giữ nguyên tiếng Việt chuẩn
 display_content = st.session_state["intro_content"]
 
-# Xử lý phát âm thanh thông minh: KHÔNG tự động đọc khi mới vào trang, chỉ đọc khi chủ động bấm
+# Chỉ phát âm thanh khi người dùng chủ động click vào nút lựa chọn
 if selected_lang == "🔊 Tiếng Mông":
     if AUDIO_MONG_FILE.exists():
-        st.audio(str(AUDIO_MONG_FILE), format="audio/mp4", autoplay=is_user_switched)
+        st.audio(str(AUDIO_MONG_FILE), format="audio/mp4", autoplay=True)
     else:
         st.warning("⚠️ Đang cập nhật tệp âm thanh tiếng Mông tại thư mục `audio/gioi_thieu_mong.m4a`.")
-else:
+elif selected_lang == "🔊 Tiếng Việt":
     try:
         vi_tts_file = DATA_DIR / "intro_vi_full_ai.mp3"
         # Tự động dùng AI tổng hợp TRỌN VẸN toàn bộ nội dung văn bản từ đầu đến cuối nếu chưa có
@@ -326,8 +319,7 @@ else:
             tts.save(str(vi_tts_file))
             
         if vi_tts_file.exists():
-            # autoplay chỉ kích hoạt khi người dùng thực sự bấm chuyển sang Tiếng Việt
-            st.audio(str(vi_tts_file), format="audio/mp3", autoplay=is_user_switched)
+            st.audio(str(vi_tts_file), format="audio/mp3", autoplay=True)
     except Exception as e:
         st.error(f"Không thể khởi tạo giọng đọc AI: {e}")
 
