@@ -271,14 +271,14 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
-# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI) & PHÁT ÂM THANH M4A CHUẨN
+# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI) & PHÁT ÂM THANH THEO TÙY CHỌN
 # ==============================================================================
 col_lang, col_space = st.columns([3, 7])
 with col_lang:
     selected_lang = st.segmented_control(
         "Chọn ngôn ngữ phát âm",
         options=["🔊 Tiếng Việt", "🔊 Tiếng Mông"],
-        default=None,  # Không chọn sẵn để tránh tự động phát âm thanh khi mới vào trang
+        default=None,  # Không chọn sẵn, tránh tự động phát âm thanh khi mới vào trang
         key="intro_language_selector",
         label_visibility="collapsed"
     )
@@ -286,17 +286,17 @@ with col_lang:
 # Văn bản hiển thị chính luôn giữ nguyên tiếng Việt chuẩn
 display_content = st.session_state["intro_content"]
 
-# Chỉ phát âm thanh khi người dùng chủ động click vào nút lựa chọn
+# Xử lý phát âm thanh chính xác khi người dùng chủ động bấm chọn
 if selected_lang == "🔊 Tiếng Mông":
     if AUDIO_MONG_FILE.exists():
         st.audio(str(AUDIO_MONG_FILE), format="audio/mp4", autoplay=True)
     else:
-        st.warning("⚠️ Chưa tìm thấy file âm thanh tiếng Mông tại thư mục `audio/gioi_thieu_mong.m4a`.")
+        st.warning("⚠️ Đang cập nhật tệp âm thanh tiếng Mông tại thư mục `audio/gioi_thieu_mong.m4a`.")
 elif selected_lang == "🔊 Tiếng Việt":
     if AUDIO_VI_FILE.exists():
         st.audio(str(AUDIO_VI_FILE), format="audio/mp4", autoplay=True)
     else:
-        st.info("💡 Để nghe đọc tiếng Việt, hãy đặt file âm thanh tiếng Việt vào thư mục `audio/gioi_thieu_vi.m4a`.")
+        st.info("💡 Để nghe bản đọc tiếng Việt, hãy đặt file âm thanh vào thư mục `audio/gioi_thieu_vi.m4a`.")
 
 st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
