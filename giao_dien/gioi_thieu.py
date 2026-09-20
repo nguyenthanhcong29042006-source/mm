@@ -5,7 +5,6 @@ import base64
 import html
 from pathlib import Path
 from core import auth
-from gtts import gTTS  # Thư viện AI chuyển toàn bộ văn bản thành giọng nói
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -68,11 +67,13 @@ st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
 # ==============================================================================
 # CƠ CHẾ LƯU TRỮ FILE CỨNG & QUẢN TRỊ NỘI DUNG GIỚI THIỆU
 # ==============================================================================
+# Xác định đường dẫn tuyệt đối đến file lưu trữ
 DATA_DIR = ROOT / "data"
 DATA_FILE = DATA_DIR / "gioi_thieu.md"
 
-# Đường dẫn đến file âm thanh tiếng Mông thu sẵn
+# Đường dẫn đến các file âm thanh thu sẵn trong thư mục audio
 AUDIO_MONG_FILE = ROOT / "audio" / "gioi_thieu_mong.m4a"
+AUDIO_VI_FILE = ROOT / "audio" / "gioi_thieu_vi.m4a"
 
 def load_intro_content():
     """Đọc nội dung từ file cứng, nếu chưa có thì trả về nội dung mặc định."""
@@ -85,6 +86,7 @@ def load_intro_content():
         st.error(f"Lỗi đọc file: {e}")
         pass
     
+    # Nội dung mặc định nếu chưa có file
     return """<h2 style="text-align: center; color: #003366;">GIỚI THIỆU DỰ ÁN</h2>
 <h2 style="text-align: center; color: #003366;">LUẬT GẦN BẢN</h2>
 <p style="text-align: center;"><b>Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số</b></p>
@@ -92,26 +94,6 @@ def load_intro_content():
 <hr>
 <h3>I. Bối cảnh và bài toán xã hội</h3>
 <p>Trong tiến trình chuyển đổi số quốc gia, hạ tầng công nghệ và điện lưới đã cơ bản phủ sóng đến các bản làng vùng cao. Tuy nhiên, rào cản về ngôn ngữ và chữ viết vẫn là thách thức lớn đối với đồng bào khi thực hiện các thủ tục hành chính thiết yếu.</p>
-"""
-
-def load_intro_mong_content():
-    """Nội dung tiếng Mông cho đồng bào"""
-    mong_file = DATA_DIR / "gioi_thieu_mong.md"
-    try:
-        if mong_file.exists():
-            content = mong_file.read_text(encoding="utf-8")
-            if content.strip():
-                return content
-    except Exception:
-        pass
-    
-    return """<h2 style="text-align: center; color: #003366;">PROJECT KONG ZOX</h2>
-<h2 style="text-align: center; color: #003366;">LUẬT GẦN BẢN</h2>
-<p style="text-align: center;"><b>Peb pab cov kwv tij hmoob daws teeb meem ntaub ntawv los ntawm lus Hmoob</b></p>
-<p style="text-align: center;"><i>“Hloov pauv digital: Tsis tso leej twg tseg”</i></p>
-<hr>
-<h3>I. Keeb kwm thiab teeb meem hauv zej zog</h3>
-<p>Nyob rau hauv txoj kev hloov pauv digital hauv tebchaws, cov tshuab hluav taws xob thiab kev tshawb fawb tau mus txog tej zos hauv roob. Txawm li cas los xij, teeb meem lus los yog ntawv sau tseem yog ib qho nyuaj rau peb cov kwv tij thaum ua cov ntaub ntawv tseem ceeb.</p>
 """
 
 def save_intro_content(content):
@@ -202,6 +184,7 @@ def docx_to_exact_html(docx_file) -> str:
         st.error(f"Không thể đọc file Word: {e}")
         return ""
 
+# Tải nội dung vào Session State (Chỉ load 1 lần khi mở app)
 if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
@@ -260,54 +243,37 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
-# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI) & CHỈ PHÁT KHI NGƯỜI DÙNG CHỦ ĐỘNG BẤM
+# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI) & PHÁT ÂM THANH THEO TÙY CHỌN
 # ==============================================================================
 col_lang, col_space = st.columns([3, 7])
 with col_lang:
     selected_lang = st.segmented_control(
-        "Chọn ngôn ngữ hiển thị và phát âm",
+        "Chọn ngôn ngữ phát âm",
         options=["🔊 Tiếng Việt", "🔊 Tiếng Mông"],
         default="🔊 Tiếng Việt",
         key="intro_language_selector",
         label_visibility="collapsed"
     )
 
-# Lưu lại trạng thái ngôn ngữ trước đó để phát hiện sự kiện "người dùng vừa bấm chuyển"
+# Theo dõi sự kiện người dùng bấm chuyển đổi để phát âm thanh chính xác
 if "prev_selected_lang" not in st.session_state:
     st.session_state["prev_selected_lang"] = selected_lang
 
 is_user_switched = (st.session_state["prev_selected_lang"] != selected_lang)
 st.session_state["prev_selected_lang"] = selected_lang
 
-# Xử lý hiển thị nội dung và phát âm thanh (chỉ phát khi người dùng chủ động chọn)
+# Văn bản chính luôn giữ nguyên tiếng Việt
+display_content = st.session_state["intro_content"]
+
+# Xử lý phát âm thanh tương ứng khi người dùng chủ động bấm chọn
 if selected_lang == "🔊 Tiếng Mông":
-    display_content = load_intro_mong_content()
     if AUDIO_MONG_FILE.exists():
-        # autoplay=is_user_switched giúp chỉ đọc khi vừa bấm, không bị đọc lặp khi load lại trang
         st.audio(str(AUDIO_MONG_FILE), format="audio/mp4", autoplay=is_user_switched)
     else:
-        st.warning("⚠️ Đang cập nhật tệp âm thanh tiếng Mông trong thư mục `audio/gioi_thieu_mong.m4a`.")
+        st.warning("⚠️ Đang cập nhật tệp âm thanh tiếng Mông tại thư mục `audio/gioi_thieu_mong.m4a`.")
 else:
-    display_content = st.session_state["intro_content"]
-    try:
-        vi_tts_file = DATA_DIR / "intro_vi_full_ai.mp3"
-        if not vi_tts_file.exists():
-            # AI đọc TRỌN VẸN toàn bộ nội dung giới thiệu từ đầu đến cuối một cách chi tiết, mạch lạc
-            full_vi_text = (
-                "Giới thiệu dự án Luật Gần Bản. "
-                "Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số. "
-                "Chuyển đổi số, không để ai bị bỏ lại phía sau. "
-                "I. Bối cảnh và bài toán xã hội. Trong tiến trình chuyển đổi số quốc gia, hạ tầng công nghệ và điện lưới "
-                "đã cơ bản phủ sóng đến các bản làng vùng cao. Tuy nhiên, rào cản về ngôn ngữ và chữ viết vẫn là thách thức "
-                "lớn đối với đồng bào khi thực hiện các thủ tục hành chính thiết yếu."
-            )
-            tts = gTTS(text=full_vi_text, lang='vi', slow=False)
-            tts.save(str(vi_tts_file))
-            
-        if vi_tts_file.exists():
-            st.audio(str(vi_tts_file), format="audio/mp3", autoplay=is_user_switched)
-    except Exception:
-        pass
+    if AUDIO_VI_FILE.exists():
+        st.audio(str(AUDIO_VI_FILE), format="audio/mp4", autoplay=is_user_switched)
 
 st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
