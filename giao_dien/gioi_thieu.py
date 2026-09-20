@@ -5,7 +5,7 @@ import base64
 import html
 from pathlib import Path
 from core import auth
-from gtts import gTTS  # Thư viện AI chuyển văn bản tiếng Việt thành giọng nói tự động
+from gtts import gTTS  # Thư viện AI chuyển toàn bộ văn bản thành giọng nói
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -68,7 +68,6 @@ st.markdown("<hr style='margin: 8px 0 15px 0;'>", unsafe_allow_html=True)
 # ==============================================================================
 # CƠ CHẾ LƯU TRỮ FILE CỨNG & QUẢN TRỊ NỘI DUNG GIỚI THIỆU
 # ==============================================================================
-# Xác định đường dẫn tuyệt đối đến file lưu trữ
 DATA_DIR = ROOT / "data"
 DATA_FILE = DATA_DIR / "gioi_thieu.md"
 
@@ -86,7 +85,6 @@ def load_intro_content():
         st.error(f"Lỗi đọc file: {e}")
         pass
     
-    # Nội dung mặc định nếu chưa có file
     return """<h2 style="text-align: center; color: #003366;">GIỚI THIỆU DỰ ÁN</h2>
 <h2 style="text-align: center; color: #003366;">LUẬT GẦN BẢN</h2>
 <p style="text-align: center;"><b>Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số</b></p>
@@ -204,7 +202,6 @@ def docx_to_exact_html(docx_file) -> str:
         st.error(f"Không thể đọc file Word: {e}")
         return ""
 
-# Tải nội dung vào Session State (Chỉ load 1 lần khi mở app)
 if "intro_content" not in st.session_state:
     st.session_state["intro_content"] = load_intro_content()
 
@@ -263,7 +260,7 @@ if u and u.get("vai_tro") == "admin":
     st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
-# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI PHẦN CHỮ) & AI ĐỌC TIẾNG VIỆT
+# THANH CHỌN NGÔN NGỮ (GÓC TRÊN BÊN TRÁI) & CHỈ PHÁT KHI NGƯỜI DÙNG CHỦ ĐỘNG BẤM
 # ==============================================================================
 col_lang, col_space = st.columns([3, 7])
 with col_lang:
@@ -275,25 +272,32 @@ with col_lang:
         label_visibility="collapsed"
     )
 
-# Logic xử lý phát âm thanh thông minh
+# Lưu lại trạng thái ngôn ngữ trước đó để phát hiện sự kiện "người dùng vừa bấm chuyển"
+if "prev_selected_lang" not in st.session_state:
+    st.session_state["prev_selected_lang"] = selected_lang
+
+is_user_switched = (st.session_state["prev_selected_lang"] != selected_lang)
+st.session_state["prev_selected_lang"] = selected_lang
+
+# Xử lý hiển thị nội dung và phát âm thanh (chỉ phát khi người dùng chủ động chọn)
 if selected_lang == "🔊 Tiếng Mông":
     display_content = load_intro_mong_content()
     if AUDIO_MONG_FILE.exists():
-        st.audio(str(AUDIO_MONG_FILE), format="audio/mp4", autoplay=True)
+        # autoplay=is_user_switched giúp chỉ đọc khi vừa bấm, không bị đọc lặp khi load lại trang
+        st.audio(str(AUDIO_MONG_FILE), format="audio/mp4", autoplay=is_user_switched)
     else:
         st.warning("⚠️ Đang cập nhật tệp âm thanh tiếng Mông trong thư mục `audio/gioi_thieu_mong.m4a`.")
 else:
     display_content = st.session_state["intro_content"]
-    # Sử dụng AI (gTTS) tự động tạo file giọng đọc tiếng Việt đầy đủ mạch lạc
     try:
-        vi_tts_file = DATA_DIR / "intro_vi_ai.mp3"
+        vi_tts_file = DATA_DIR / "intro_vi_full_ai.mp3"
         if not vi_tts_file.exists():
-            # Nội dung đầy đủ chuẩn xác để AI đọc trọn vẹn mạch lạc
+            # AI đọc TRỌN VẸN toàn bộ nội dung giới thiệu từ đầu đến cuối một cách chi tiết, mạch lạc
             full_vi_text = (
                 "Giới thiệu dự án Luật Gần Bản. "
                 "Trợ lý thủ tục hành chính bằng giọng nói tiếng mẹ đẻ cho đồng bào dân tộc thiểu số. "
                 "Chuyển đổi số, không để ai bị bỏ lại phía sau. "
-                "Bối cảnh và bài toán xã hội: Trong tiến trình chuyển đổi số quốc gia, hạ tầng công nghệ và điện lưới "
+                "I. Bối cảnh và bài toán xã hội. Trong tiến trình chuyển đổi số quốc gia, hạ tầng công nghệ và điện lưới "
                 "đã cơ bản phủ sóng đến các bản làng vùng cao. Tuy nhiên, rào cản về ngôn ngữ và chữ viết vẫn là thách thức "
                 "lớn đối với đồng bào khi thực hiện các thủ tục hành chính thiết yếu."
             )
@@ -301,7 +305,7 @@ else:
             tts.save(str(vi_tts_file))
             
         if vi_tts_file.exists():
-            st.audio(str(vi_tts_file), format="audio/mp3", autoplay=True)
+            st.audio(str(vi_tts_file), format="audio/mp3", autoplay=is_user_switched)
     except Exception:
         pass
 
