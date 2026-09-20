@@ -60,12 +60,12 @@ st.markdown("---")
 
 
 # ==========================================================================
-# HÀM CÓ CACHE TỐI ƯU TOÀN DIỆN (Đảm bảo tốc độ cực nhanh, không nghẽn)
+# CÁC HÀM CACHE TỐI ƯU TỐC ĐỘ (Lưu trữ kết quả giúp lần sau bấm là ra ngay)
 # ==========================================================================
 @st.cache_data(ttl=3600, show_spinner=False)
 def _dinh_tuyen(cau_noi: str) -> dict:
     r = dinh_tuyen(cau_noi)
-    r["_key"] = r["thu_tuc"].key if r["thu_tuc"] else ""
+    r["_key"] = r["thu_tuc"].key if r["thu_tuc"] else ""    # ThuTuc không hash được
     r.pop("thu_tuc", None)
     return r
 
@@ -92,7 +92,7 @@ def _tts_vi(text: str) -> str:
 
 @st.cache_data(ttl=24 * 3600, show_spinner=False)
 def _lay_audio_mong(rpa_text: str, key: str) -> tuple[str, str]:
-    """Cache sẵn âm thanh tiếng Mông để lần sau tải ngay lập tức."""
+    """Cache sẵn audio tiếng Mông để không phải gọi lại AI nhiều lần."""
     try:
         audio, tang = phat_tieng_mong(rpa_text, key=key)
         return str(audio) if audio else "", tang
@@ -172,7 +172,7 @@ def loa(text: str, *, nhan: str = "Nghe", tu_phat: bool = False) -> None:
 
 
 # ==========================================================================
-# PIPELINE CHÍNH & XỬ LÝ SIÊU TỐC
+# PIPELINE (Giữ nguyên toàn bộ logic chuẩn, tối ưu bằng cache bên trong)
 # ==========================================================================
 def _thong_diep_loi(e: Exception) -> str:
     if isinstance(e, LoiQuota):
@@ -220,11 +220,11 @@ def chay_pipeline(cau_noi: str, *, phat_giong_mong: bool = True) -> dict:
         kq["thoi_gian"]["don_gian_hoa"] = time.perf_counter() - t
         kq["kich_ban"] = thanh_van_ban_doc(kq["don_gian"])
 
-        box.write("Đang chuẩn bị giọng đọc...")
+        box.write("Đang chuẩn bị giọng đọc…")
         kq["audio_viet"] = _tts_vi(kq["kich_ban"])
 
         if phat_giong_mong:
-            box.write("Đang chuẩn bị tiếng Mông...")
+            box.write("Đang dịch sang tiếng Mông…")
             t = time.perf_counter()
             try:
                 kq["mong"] = _dich_mong(kq["kich_ban"])
@@ -233,7 +233,7 @@ def chay_pipeline(cau_noi: str, *, phat_giong_mong: bool = True) -> dict:
                 t = time.perf_counter()
                 audio, tang = _lay_audio_mong(kq["mong"]["rpa"], key=tt.key)
                 kq["thoi_gian"]["tts"] = time.perf_counter() - t
-                kq["audio_mong"] = audio
+                kq["audio_mong"] = str(audio) if audio else ""
                 kq["tang_tts"] = tang
             except Exception as e:
                 kq["canh_bao"] = "Phần tiếng Mông chưa sẵn sàng, bà con nghe tạm tiếng Việt nhé."
@@ -247,42 +247,6 @@ def chay_pipeline(cau_noi: str, *, phat_giong_mong: bool = True) -> dict:
 def xu_ly_cau_noi(van_ban: str) -> None:
     ss.cau_noi = van_ban
     kq = chay_pipeline(van_ban)
-    kq["la_tieng_mong"] = bool(ss.get("la_tieng_mong", True))
-    ss.ket_qua = kq
-
-
-def xu_ly_chon_nhanh(tt) -> None:
-    """Logic tối ưu hoàn hảo: Xử lý trực tiếp thủ tục được chọn, bỏ qua định tuyến rườm rà."""
-    ss.cau_noi = tt.ten
-    t0 = time.perf_counter()
-    kq: dict = {"cau_noi": ss.cau_noi, "thoi_gian": {}}
-
-    with st.status("Đang lấy hướng dẫn cho bà con…", expanded=False) as box:
-        kq["tuyen"] = {"can_can_bo": False, "tin_cay_thu_tuc": 1.0, "ten_nhom": "Chọn trực tiếp"}
-        kq["thu_tuc"] = tt
-
-        box.write("Đang đọc hướng dẫn...")
-        try:
-            kq["don_gian"] = _don_gian_hoa(tt.key, CAU_HOI_MAC_DINH)
-        except Exception:
-            kq["don_gian"] = {"tom_tat_1_cau": f"Hướng dẫn {tt.ten}"}
-
-        kq["kich_ban"] = thanh_van_ban_doc(kq["don_gian"])
-        kq["audio_viet"] = _tts_vi(kq["kich_ban"])
-
-        box.write("Đang chuẩn bị tiếng Mông...")
-        try:
-            kq["mong"] = _dich_mong(kq["kich_ban"])
-            audio, tang = _lay_audio_mong(kq["mong"]["rpa"], key=tt.key)
-            kq["audio_mong"] = audio
-            kq["tang_tts"] = tang
-        except Exception as e:
-            kq["canh_bao"] = "Phần tiếng Mông chưa sẵn sàng, bà con nghe tạm tiếng Việt nhé."
-            kq["_loi_mong"] = str(e)
-
-        kq["thoi_gian"]["tong"] = time.perf_counter() - t0
-        box.update(label="Đã có hướng dẫn", state="complete", expanded=False)
-
     kq["la_tieng_mong"] = bool(ss.get("la_tieng_mong", True))
     ss.ket_qua = kq
 
@@ -500,8 +464,7 @@ with st.expander("⌨️ Không nói được? Gõ chữ hoặc chọn từ danh
         else:
             tt_chon = st.selectbox("Thủ tục cụ thể", ds, format_func=lambda t: t.ten)
             if st.button("Xem hướng dẫn", type="primary", use_container_width=True):
-                # Sử dụng hàm xử lý tối ưu siêu tốc riêng cho phần chọn trực tiếp
-                xu_ly_chon_nhanh(tt_chon)
+                xu_ly_cau_noi(tt_chon.ten)
                 st.rerun()
 
 st.markdown('</div>', unsafe_allow_html=True)
